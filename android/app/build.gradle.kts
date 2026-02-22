@@ -40,7 +40,7 @@ android {
         resValue(
             "string",
             "google_play_rsa_public_key",
-            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8r0Cvpr++JXBx4TAXEhSoHg8H9u+0tVhwZIukpYPNZeKuBPxRSEeYeAOfKkpTuZKHUiunBQn/nY2DCqTorSu63gXDGEA94N4VyQ6ZAwM8FUHut8maGiJQl/q7RFT98xwihyngByCwz0DpYVt9WzXHBrX/jSiMPBZIDG+PR+wDdFMym/7MZ1oUS+96uF9BlQlvl5r7Zy6RC1O1H1MXe4PrpfBjIA8tVH5dxZS6sVBwuqYxBpEadX0Zo4Aloxz4CxGsuhLj59TghChd3pnMje51Bkdu5EW3Y84JWK9xQyC+EylEUoAyac8f+h9w559aAt/Ax8E8mMHPvQk0AxzjI1wZwIDAQAB",
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlI9uZq50HRMZmj/LuZ2z2s/hdLM6aaqv895p2XyzD/OW/8hGJwI+J4wHVPf0SMRjk6fDp1lw+kPdaX7emfsBoUDz14B8H9DnYHj+EpcIdiUp4Cqn9IyzV2tpF1XWZGWyfvBp3yYe+ip9xmkD3c2+aRJXbdwG9cQU51qNvwXzVoz/hKDCwgnFsbEeXHgL6n/gZLKCIIp+Nw7/F1hrIsINcQT1UdktKaayI4CpyDPAa+5/NAYHAJJYWgPvhPGuC0O1I8nGdyhmJvWAQen2vTfd1a9zTqbNNWZawdbA63V6eyDifTrc/RYgqQt376fopvYZiuRI6Wu7sWLMfJndVdu7QIDAQAB",
         )
     }
 
