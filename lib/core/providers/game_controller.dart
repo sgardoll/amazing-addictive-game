@@ -1,48 +1,124 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:mindsort/core/models/game_state.dart';
+import 'package:mindsort/core/models/bottle.dart';
 import 'package:mindsort/core/models/level.dart';
+import 'package:mindsort/core/services/level_generator.dart';
 
-part 'game_controller.freezed.dart';
+class GameStateData {
+  final int levelId;
+  final List<Bottle> bottles;
+  final int moves;
+  final int parMoves;
+  final bool isWon;
+  final int? selectedBottleIndex;
+  final List<List<Bottle>> history;
+  final int hintsUsed;
+  final bool showHint;
 
-@freezed
-class GameControllerState with _$GameControllerState {
-  const factory GameControllerState({
-    required GameState gameState,
-    required List<Level> levels,
-    required Level? currentLevel,
-    required bool isLoading,
-    required bool isGameOver,
-    required bool isWon,
-    required String? error,
-  }) = _GameControllerState;
+  const GameStateData({
+    required this.levelId,
+    required this.bottles,
+    required this.moves,
+    required this.parMoves,
+    required this.isWon,
+    this.selectedBottleIndex,
+    this.history = const [],
+    this.hintsUsed = 0,
+    this.showHint = false,
+  });
 
-  factory GameControllerState.initial() => const GameControllerState(
-    gameState: GameState.initial(),
-    levels: [],
-    currentLevel: null,
-    isLoading: false,
-    isGameOver: false,
-    isWon: false,
-    error: null,
-  );
+  GameStateData copyWith({
+    int? levelId,
+    List<Bottle>? bottles,
+    int? moves,
+    int? parMoves,
+    bool? isWon,
+    int? selectedBottleIndex,
+    bool clearSelection = false,
+    List<List<Bottle>>? history,
+    int? hintsUsed,
+    bool? showHint,
+  }) {
+    return GameStateData(
+      levelId: levelId ?? this.levelId,
+      bottles: bottles ?? this.bottles,
+      moves: moves ?? this.moves,
+      parMoves: parMoves ?? this.parMoves,
+      isWon: isWon ?? this.isWon,
+      selectedBottleIndex: clearSelection
+          ? null
+          : (selectedBottleIndex ?? this.selectedBottleIndex),
+      history: history ?? this.history,
+      hintsUsed: hintsUsed ?? this.hintsUsed,
+      showHint: showHint ?? this.showHint,
+    );
+  }
+
+  bool get canUndo => history.isNotEmpty;
+  int get completeBottles =>
+      bottles.where((b) => b.isComplete || b.isEmpty).length;
+  int get totalBottles => bottles.length;
 }
 
-class GameController extends RiverpodNotifier<GameControllerState> {
-  GameController(Ref ref) : super(const GameControllerState.initial());
+class GameControllerState {
+  final GameStateData gameState;
+  final List<Level> levels;
+  final Level? currentLevel;
+  final bool isLoading;
+  final bool isWon;
+  final String? error;
+
+  const GameControllerState({
+    required this.gameState,
+    this.levels = const [],
+    this.currentLevel,
+    this.isLoading = false,
+    this.isWon = false,
+    this.error,
+  });
+
+  factory GameControllerState.initial() => const GameControllerState(
+    gameState: GameStateData(
+      levelId: 1,
+      bottles: [],
+      moves: 0,
+      parMoves: 10,
+      isWon: false,
+    ),
+  );
+
+  GameControllerState copyWith({
+    GameStateData? gameState,
+    List<Level>? levels,
+    Level? currentLevel,
+    bool? isLoading,
+    bool? isWon,
+    String? error,
+  }) {
+    return GameControllerState(
+      gameState: gameState ?? this.gameState,
+      levels: levels ?? this.levels,
+      currentLevel: currentLevel ?? this.currentLevel,
+      isLoading: isLoading ?? this.isLoading,
+      isWon: isWon ?? this.isWon,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class GameController extends StateNotifier<GameControllerState> {
+  GameController() : super(GameControllerState.initial());
 
   void initializeGame() {
-    state = state.copyWith(isLoading: true);
+    state = GameControllerState(isLoading: true, gameState: state.gameState);
 
-    final levels = _generateLevels();
-    final currentLevel = levels.firstWhere(
-      (level) => level.id == state.gameState.levelId,
-    );
+    final levels = LevelGenerator.generateLevels(count: 120);
+    final currentLevel = levels.first;
 
-    state = state.copyWith(
+    state = GameControllerState(
       levels: levels,
       currentLevel: currentLevel,
       gameState: state.gameState.copyWith(
+        levelId: currentLevel.id,
         bottles: currentLevel.bottles,
         parMoves: currentLevel.parMoves,
       ),
@@ -50,29 +126,27 @@ class GameController extends RiverpodNotifier<GameControllerState> {
     );
   }
 
-  void selectBottle(int bottleId) {
-    final currentSelection = state.gameState.selectedBottle;
+  void selectBottle(int bottleIndex) {
+    final currentSelection = state.gameState.selectedBottleIndex;
     final bottles = state.gameState.bottles;
 
-    if (currentSelection == bottleId) {
-      // Deselect same bottle
+    if (currentSelection == bottleIndex) {
       state = state.copyWith(
-        gameState: state.gameState.copyWith(selectedBottle: null),
+        gameState: state.gameState.copyWith(clearSelection: true),
       );
       return;
     }
 
-    final selectedBottle = bottles.firstWhere((b) => b.id == bottleId);
+    final selectedBottle = bottles[bottleIndex];
 
     if (currentSelection == null) {
-      // First selection - just select
       state = state.copyWith(
-        gameState: state.gameState.copyWith(selectedBottle: bottleId),
+        gameState: state.gameState.copyWith(selectedBottleIndex: bottleIndex),
       );
       return;
     }
 
-    final fromBottle = bottles.firstWhere((b) => b.id == currentSelection);
+    final fromBottle = bottles[currentSelection];
     final toBottle = selectedBottle;
 
     if (fromBottle.canPourTo(toBottle)) {
@@ -81,17 +155,18 @@ class GameController extends RiverpodNotifier<GameControllerState> {
         final newFrom = _pour(fromBottle, -pourableAmount);
         final newTo = _pour(toBottle, pourableAmount);
 
-        final newBottles = bottles
-            .map((b) => b.id == fromBottle.id ? newFrom : b)
-            .map((b) => b.id == toBottle.id ? newTo : b)
-            .toList();
+        final newBottles = bottles.asMap().entries.map((entry) {
+          if (entry.key == currentSelection) return newFrom;
+          if (entry.key == bottleIndex) return newTo;
+          return entry.value;
+        }).toList();
 
         final newHistory = [...state.gameState.history, bottles];
 
         state = state.copyWith(
           gameState: state.gameState.copyWith(
             bottles: newBottles,
-            selectedBottle: null,
+            clearSelection: true,
             moves: state.gameState.moves + 1,
             history: newHistory,
           ),
@@ -107,14 +182,15 @@ class GameController extends RiverpodNotifier<GameControllerState> {
   void undo() {
     if (state.gameState.history.isNotEmpty) {
       final lastState = state.gameState.history.last;
-      final newHistory = state.gameState.history
-          .take(state.gameState.history.length - 1)
-          .toList();
+      final newHistory = state.gameState.history.sublist(
+        0,
+        state.gameState.history.length - 1,
+      );
 
       state = state.copyWith(
         gameState: state.gameState.copyWith(
           bottles: lastState,
-          selectedBottle: null,
+          clearSelection: true,
           moves: state.gameState.moves - 1,
           history: newHistory,
         ),
@@ -125,10 +201,12 @@ class GameController extends RiverpodNotifier<GameControllerState> {
   void restartLevel() {
     if (state.currentLevel != null) {
       state = state.copyWith(
-        gameState: GameState.initial().copyWith(
+        gameState: GameStateData(
           levelId: state.currentLevel!.id,
           bottles: state.currentLevel!.bottles,
+          moves: 0,
           parMoves: state.currentLevel!.parMoves,
+          isWon: false,
         ),
         isWon: false,
       );
@@ -136,16 +214,23 @@ class GameController extends RiverpodNotifier<GameControllerState> {
   }
 
   void nextLevel() {
-    final nextLevel = state.levels.firstWhereOrNull(
-      (level) => level.id == state.gameState.levelId + 1,
-    );
+    Level? nextLevel;
+    try {
+      nextLevel = state.levels.firstWhere(
+        (level) => level.id == state.gameState.levelId + 1,
+      );
+    } catch (_) {
+      nextLevel = null;
+    }
 
     if (nextLevel != null) {
       state = state.copyWith(
-        gameState: GameState.initial().copyWith(
+        gameState: GameStateData(
           levelId: nextLevel.id,
           bottles: nextLevel.bottles,
+          moves: 0,
           parMoves: nextLevel.parMoves,
+          isWon: false,
         ),
         currentLevel: nextLevel,
         isWon: false,
@@ -153,22 +238,17 @@ class GameController extends RiverpodNotifier<GameControllerState> {
     }
   }
 
-  void useHint() {
-    // TODO: Implement hint system
+  void useHint() {}
+
+  void onBottleTap(int bottleIndex) {
+    selectBottle(bottleIndex);
   }
 
-  void toggleHintVisibility() {
+  void addBottle() {
+    final bottles = state.gameState.bottles;
+    final newBottle = Bottle(id: bottles.length + 1, capacity: 4);
     state = state.copyWith(
-      gameState: state.gameState.copyWith(showHint: !state.gameState.showHint),
-    );
-  }
-
-  void setHintMove(int fromBottle, int toBottle) {
-    state = state.copyWith(
-      gameState: state.gameState.copyWith(
-        hintFromBottle: fromBottle,
-        hintToBottle: toBottle,
-      ),
+      gameState: state.gameState.copyWith(bottles: [...bottles, newBottle]),
     );
   }
 
@@ -177,13 +257,12 @@ class GameController extends RiverpodNotifier<GameControllerState> {
 
     final newContents = bottle.contents.toList();
     if (amount > 0) {
-      // Adding liquid
-      final topColor = bottle.top!;
+      final topColor = bottle.top;
+      if (topColor == null) return bottle;
       for (int i = 0; i < amount; i++) {
         newContents.add(topColor);
       }
     } else {
-      // Removing liquid
       newContents.removeRange(newContents.length + amount, newContents.length);
     }
 
@@ -200,48 +279,9 @@ class GameController extends RiverpodNotifier<GameControllerState> {
       gameState: state.gameState.copyWith(isWon: true),
     );
   }
-
-  List<Level> _generateLevels() {
-    return [
-      Level(
-        id: 1,
-        bottles: [
-          Bottle(
-            id: 1,
-            capacity: 4,
-            contents: [
-              Emotion.anger,
-              Emotion.anger,
-              Emotion.anger,
-              Emotion.anger,
-            ],
-          ),
-          Bottle(
-            id: 2,
-            capacity: 4,
-            contents: [Emotion.joy, Emotion.joy, Emotion.joy, Emotion.joy],
-          ),
-          Bottle(
-            id: 3,
-            capacity: 4,
-            contents: [Emotion.calm, Emotion.calm, Emotion.calm, Emotion.calm],
-          ),
-          Bottle(
-            id: 4,
-            capacity: 4,
-            contents: [Emotion.love, Emotion.love, Emotion.love, Emotion.love],
-          ),
-          Bottle(id: 5, capacity: 4),
-          Bottle(id: 6, capacity: 4),
-        ],
-        parMoves: 10,
-      ),
-      // Add more levels...
-    ];
-  }
 }
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameControllerState>((ref) {
-      return GameController(ref);
+      return GameController();
     });

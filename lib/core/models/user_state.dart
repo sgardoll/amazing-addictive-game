@@ -1,23 +1,52 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+class UserStateData {
+  final int gems;
+  final int currentLevel;
+  final int totalStars;
+  final int dailyStreak;
+  final bool hasRemovedAds;
+  final bool hasWeeklyPass;
+  final int lastDailyChallengeDay;
+  final bool soundEnabled;
+  final bool hapticsEnabled;
+  final bool darkMode;
 
-part 'user_state.freezed.dart';
+  const UserStateData({
+    this.gems = 0,
+    this.currentLevel = 1,
+    this.totalStars = 0,
+    this.dailyStreak = 0,
+    this.hasRemovedAds = false,
+    this.hasWeeklyPass = false,
+    this.lastDailyChallengeDay = 0,
+    this.soundEnabled = true,
+    this.hapticsEnabled = true,
+    this.darkMode = false,
+  });
 
-@freezed
-class UserState with _$UserState {
-  const factory UserState({
-    @Default(0) int gems,
-    @Default(0) int coins,
-    @Default(1) int currentLevel,
-    @Default(0) int totalStars,
-    @Default(0) int dailyStreak,
-    @Default(false) bool hasRemovedAds,
-    @Default(false) bool hasWeeklyPass,
-    @Default(0) int lastDailyChallengeDay,
-    @Default(false) bool soundEnabled,
-    @Default(true) bool hapticsEnabled,
-    @Default(false) bool darkMode,
-  }) = _UserState;
-
-  factory UserState.initial() => const UserState();
+  UserStateData copyWith({
+    int? gems,
+    int? currentLevel,
+    int? totalStars,
+    int? dailyStreak,
+    bool? hasRemovedAds,
+    bool? hasWeeklyPass,
+    int? lastDailyChallengeDay,
+    bool? soundEnabled,
+    bool? hapticsEnabled,
+    bool? darkMode,
+  }) {
+    return UserStateData(
+      gems: gems ?? this.gems,
+      currentLevel: currentLevel ?? this.currentLevel,
+      totalStars: totalStars ?? this.totalStars,
+      dailyStreak: dailyStreak ?? this.dailyStreak,
+      hasRemovedAds: hasRemovedAds ?? this.hasRemovedAds,
+      hasWeeklyPass: hasWeeklyPass ?? this.hasWeeklyPass,
+      lastDailyChallengeDay:
+          lastDailyChallengeDay ?? this.lastDailyChallengeDay,
+      soundEnabled: soundEnabled ?? this.soundEnabled,
+      hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
+      darkMode: darkMode ?? this.darkMode,
+    );
+  }
 }

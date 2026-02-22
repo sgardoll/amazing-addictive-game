@@ -1,38 +1,44 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'emotion.dart';
 import 'bottle.dart';
 
-part 'game_state.freezed.dart';
+class GameStateData {
+  final int levelId;
+  final List<Bottle> bottles;
+  final int moves;
+  final int parMoves;
+  final bool isWon;
+  final Bottle? selectedBottle;
+  final List<List<Bottle>> history;
 
-@freezed
-class GameState with _$GameState {
-  const factory GameState({
-    required int levelId,
-    required List<Bottle> bottles,
-    required int moves,
-    required int parMoves,
-    required bool isWon,
-    required Bottle? selectedBottle,
-    required List<List<Bottle>> history,
-    @Default(0) int hintsUsed,
-    @Default(false) bool showHint,
-    @Default(-1) int hintFromBottle,
-    @Default(-1) int hintToBottle,
-  }) = _GameState;
+  const GameStateData({
+    required this.levelId,
+    required this.bottles,
+    required this.moves,
+    required this.parMoves,
+    required this.isWon,
+    this.selectedBottle,
+    this.history = const [],
+  });
 
-  factory GameState.initial() => const GameState(
-    levelId: 1,
-    bottles: [],
-    moves: 0,
-    parMoves: 10,
-    isWon: false,
-    selectedBottle: null,
-    history: [],
-  );
-}
+  GameStateData copyWith({
+    int? levelId,
+    List<Bottle>? bottles,
+    int? moves,
+    int? parMoves,
+    bool? isWon,
+    Bottle? selectedBottle,
+    List<List<Bottle>>? history,
+  }) {
+    return GameStateData(
+      levelId: levelId ?? this.levelId,
+      bottles: bottles ?? this.bottles,
+      moves: moves ?? this.moves,
+      parMoves: parMoves ?? this.parMoves,
+      isWon: isWon ?? this.isWon,
+      selectedBottle: selectedBottle,
+      history: history ?? this.history,
+    );
+  }
 
-extension GameStateX on GameState {
   bool get canUndo => history.isNotEmpty;
   int get completeBottles => bottles.where((b) => b.isComplete).length;
   int get totalBottles => bottles.length;

@@ -1,102 +1,464 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mindsort/core/providers/achievement_controller.dart';
+import 'package:mindsort/core/providers/daily_challenge_controller.dart';
 import 'package:mindsort/core/providers/game_controller.dart';
+import 'package:mindsort/core/providers/iap_controller.dart';
+import 'package:mindsort/core/services/revenuecat_service.dart';
+import 'package:mindsort/features/game/widgets/game_board.dart';
+import 'package:confetti/confetti.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: MindSortApp()));
 }
 
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
+class MindSortApp extends StatelessWidget {
+  const MindSortApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MindSort - Emotion Sorting Puzzle',
+      title: 'MindSort',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6366F1),
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
+        fontFamily: 'Poppins',
       ),
-      home: const MyHomePage(title: 'MindSort'),
+      home: const GameScreen(),
     );
   }
 }
 
-class MyHomePage extends ConsumerStatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class GameScreen extends ConsumerStatefulWidget {
+  const GameScreen({super.key});
 
   @override
-  ConsumerState<MyHomePage> createState() {> MyHomePageState();
+  ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class MyHomePageState extends ConsumerState<MyHomePage> {
+class _GameScreenState extends ConsumerState<GameScreen> {
+  late ConfettiController _confettiController;
+  int _lastRecordedWinLevel = -1;
+
   @override
   void initState() {
     super.initState();
-    ref.read(gameControllerProvider.notifier).initializeGame();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
+    Future.microtask(() {
+      ref.read(gameControllerProvider.notifier).initializeGame();
+      ref.read(iapControllerProvider.notifier).initialize();
+      ref.read(dailyChallengeProvider.notifier).initialize();
+      ref.read(achievementControllerProvider.notifier).initialize();
+    });
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controllerState = ref.watch(gameControllerProvider);
-    
-    if (controllerState.isLoading) {
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(gameControllerProvider);
+    final iapState = ref.watch(iapControllerProvider);
+    final dailyState = ref.watch(dailyChallengeProvider);
+
+    if (state.isLoading) {
       return const Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Loading your journey...'),
+            ],
+          ),
         ),
       );
     }
 
+    if (state.isWon) {
+      _confettiController.play();
+      if (_lastRecordedWinLevel != state.gameState.levelId) {
+        _lastRecordedWinLevel = state.gameState.levelId;
+        ref.read(achievementControllerProvider.notifier).recordLevelComplete();
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Open settings
-            },
-          ),
-        ],
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          // Game board goes here
-          Expanded(
-            child: Center(
-              child: Text(
-                'Game board will be implemented in Wave 2',
-                style: Theme.of(context).textTheme.headlineMedium,
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1E1B4B),
+                  Color(0xFF312E81),
+                  Color(0xFF4C1D95),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(context, state, iapState, dailyState),
+                  const GameHUD(),
+                  const Expanded(child: GameBoard()),
+                  const GameControls(),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
           ),
-          // Controls
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.undo),
-                  onPressed: () {
-                    ref.read(gameControllerProvider.notifier).undo();
-                  },
-                  tooltip: 'Undo last move',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () {
-                    ref.read(gameControllerProvider.notifier).restartLevel();
-                  },
-                  tooltip: 'Restart level',
-                ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Color(0xFFE53935),
+                Color(0xFFFDD835),
+                Color(0xFF42A5F5),
+                Color(0xFFEC407A),
+                Color(0xFF66BB6A),
+                Color(0xFFAB47BC),
               ],
             ),
           ),
+          if (state.isWon) _buildWinOverlay(context, state),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    BuildContext context,
+    GameControllerState state,
+    IapState iapState,
+    DailyChallengeState dailyState,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'MindSort',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'Level ${state.gameState.levelId}',
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              _buildGemCounter(iapState),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Colors.white,
+                ),
+                onPressed: () => _openShop(context),
+              ),
+              IconButton(
+                icon: Icon(
+                  dailyState.claimedToday ? Icons.event_available : Icons.event,
+                  color: Colors.white,
+                ),
+                onPressed: () => _openDailyRewards(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings_outlined, color: Colors.white),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openDailyRewards(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF1F1B4B),
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final dailyState = ref.watch(dailyChallengeProvider);
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Daily Rewards',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Streak: ${dailyState.streak} days',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: dailyState.claimedToday
+                        ? null
+                        : () async {
+                            final reward = await ref
+                                .read(dailyChallengeProvider.notifier)
+                                .claimDailyReward();
+                            ref
+                                .read(iapControllerProvider.notifier)
+                                .addGems(reward);
+                            final streak = ref
+                                .read(dailyChallengeProvider)
+                                .streak;
+                            await ref
+                                .read(achievementControllerProvider.notifier)
+                                .recordStreak(streak);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                    child: Text(
+                      dailyState.claimedToday
+                          ? 'Already Claimed Today'
+                          : 'Claim Daily Reward',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildGemCounter(IapState iapState) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.diamond, size: 16, color: Color(0xFF60A5FA)),
+          const SizedBox(width: 4),
+          Text(
+            '${iapState.gems}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openShop(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF1F1B4B),
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final iapState = ref.watch(iapControllerProvider);
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Shop',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                  const SizedBox(height: 12),
+                  _shopItem(
+                    context,
+                    title: '100 Gems',
+                    price: r'$0.99',
+                    onTap: () async {
+                      await ref
+                          .read(iapControllerProvider.notifier)
+                          .purchase(RevenueCatService.gems100);
+                      await ref
+                          .read(achievementControllerProvider.notifier)
+                          .recordPurchase();
+                    },
+                  ),
+                  _shopItem(
+                    context,
+                    title: '500 Gems',
+                    price: r'$3.99',
+                    onTap: () async {
+                      await ref
+                          .read(iapControllerProvider.notifier)
+                          .purchase(RevenueCatService.gems500);
+                      await ref
+                          .read(achievementControllerProvider.notifier)
+                          .recordPurchase();
+                    },
+                  ),
+                  _shopItem(
+                    context,
+                    title: '1500 Gems',
+                    price: r'$9.99',
+                    onTap: () async {
+                      await ref
+                          .read(iapControllerProvider.notifier)
+                          .purchase(RevenueCatService.gems1500);
+                      await ref
+                          .read(achievementControllerProvider.notifier)
+                          .recordPurchase();
+                    },
+                  ),
+                  _shopItem(
+                    context,
+                    title: 'Weekly Pass',
+                    price: r'$2.99/week',
+                    onTap: () async {
+                      await ref
+                          .read(iapControllerProvider.notifier)
+                          .purchase(RevenueCatService.weeklyPass);
+                      await ref
+                          .read(achievementControllerProvider.notifier)
+                          .recordPurchase();
+                    },
+                  ),
+                  _shopItem(
+                    context,
+                    title: 'Remove Ads',
+                    price: r'$4.99',
+                    onTap: () async {
+                      await ref
+                          .read(iapControllerProvider.notifier)
+                          .purchase(RevenueCatService.removeAds);
+                      await ref
+                          .read(achievementControllerProvider.notifier)
+                          .recordPurchase();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () =>
+                        ref.read(iapControllerProvider.notifier).restore(),
+                    child: const Text('Restore Purchases'),
+                  ),
+                  if (iapState.loading) const CircularProgressIndicator(),
+                  if (iapState.error != null)
+                    Text(
+                      iapState.error!,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _shopItem(
+    BuildContext context, {
+    required String title,
+    required String price,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        tileColor: Colors.white10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(title, style: const TextStyle(color: Colors.white)),
+        trailing: FilledButton(onPressed: onTap, child: Text(price)),
+      ),
+    );
+  }
+
+  Widget _buildWinOverlay(BuildContext context, GameControllerState state) {
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.celebration, size: 64, color: Color(0xFF6366F1)),
+              const SizedBox(height: 16),
+              const Text(
+                'Harmony Restored!',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Level ${state.gameState.levelId} Complete',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Moves: ${state.gameState.moves}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      ref.read(gameControllerProvider.notifier).restartLevel();
+                    },
+                    child: const Text('Replay'),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(gameControllerProvider.notifier).nextLevel();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6366F1),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Next Level'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
