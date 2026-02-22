@@ -362,7 +362,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: '100 Gems',
-                    price: r'$0.99',
+                    price: _localizedPrice(iapState, RevenueCatService.gems100),
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)
@@ -375,7 +375,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: '500 Gems',
-                    price: r'$3.99',
+                    price: _localizedPrice(iapState, RevenueCatService.gems500),
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)
@@ -388,7 +388,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: '1500 Gems',
-                    price: r'$9.99',
+                    price: _localizedPrice(
+                      iapState,
+                      RevenueCatService.gems1500,
+                    ),
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)
@@ -401,7 +404,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: 'Weekly Pass',
-                    price: 'US\$2.99/week',
+                    price: _localizedPrice(
+                      iapState,
+                      RevenueCatService.weeklyPass,
+                    ),
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)
@@ -414,7 +420,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: 'Remove Ads',
-                    price: r'$4.99',
+                    price: _localizedPrice(
+                      iapState,
+                      RevenueCatService.removeAds,
+                    ),
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)
@@ -443,6 +452,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         );
       },
     );
+  }
+
+  String _localizedPrice(IapState iapState, String productId) {
+    final availablePackages = iapState.offerings?.current?.availablePackages;
+    if (availablePackages == null) {
+      return '...';
+    }
+    for (final package in availablePackages) {
+      if (package.storeProduct.identifier == productId) {
+        return package.storeProduct.priceString;
+      }
+    }
+    return '...';
   }
 
   Widget _shopItem(
