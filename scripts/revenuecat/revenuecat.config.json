@@ -1,0 +1,125 @@
+{
+  "api_base": "https://api.revenuecat.com/v2",
+  "project": {
+    "name": "Mindsweeper"
+  },
+  "offering": {
+    "lookup_key": "default",
+    "display_name": "Default Offering",
+    "is_current": true
+  },
+  "apps": [
+    {
+      "name": "Mindsweeper (App Store)",
+      "type": "app_store",
+      "bundle_id": "com.connectio.mindsweeper",
+      "store_identifiers": {
+        "gems_100": "gems_100",
+        "gems_500": "gems_500",
+        "gems_1500": "gems_1500",
+        "weekly_pass": "weekly_pass",
+        "remove_ads": "remove_ads"
+      }
+    },
+    {
+      "name": "Mindsweeper (Play Store)",
+      "type": "play_store",
+      "package_name": "com.connectio.mindsweeper",
+      "store_identifiers": {
+        "gems_100": "gems_100",
+        "gems_500": "gems_500",
+        "gems_1500": "gems_1500",
+        "weekly_pass": "weekly_pass",
+        "remove_ads": "remove_ads"
+      }
+    }
+  ],
+  "catalog": [
+    {
+      "key": "gems_100",
+      "product_type": "consumable",
+      "display_name": "100 Gems",
+      "entitlements": []
+    },
+    {
+      "key": "gems_500",
+      "product_type": "consumable",
+      "display_name": "500 Gems",
+      "entitlements": []
+    },
+    {
+      "key": "gems_1500",
+      "product_type": "consumable",
+      "display_name": "1500 Gems",
+      "entitlements": []
+    },
+    {
+      "key": "weekly_pass",
+      "product_type": "subscription",
+      "display_name": "Weekly Pass",
+      "entitlements": [
+        "weekly_pass"
+      ]
+    },
+    {
+      "key": "remove_ads",
+      "product_type": "non_consumable",
+      "display_name": "Remove Ads",
+      "entitlements": [
+        "remove_ads"
+      ]
+    }
+  ],
+  "entitlements": [
+    {
+      "lookup_key": "weekly_pass",
+      "display_name": "Weekly Pass"
+    },
+    {
+      "lookup_key": "remove_ads",
+      "display_name": "Remove Ads"
+    }
+  ],
+  "packages": [
+    {
+      "lookup_key": "gems_100",
+      "display_name": "100 Gems",
+      "position": 0,
+      "product_keys": [
+        "gems_100"
+      ]
+    },
+    {
+      "lookup_key": "gems_500",
+      "display_name": "500 Gems",
+      "position": 1,
+      "product_keys": [
+        "gems_500"
+      ]
+    },
+    {
+      "lookup_key": "gems_1500",
+      "display_name": "1500 Gems",
+      "position": 2,
+      "product_keys": [
+        "gems_1500"
+      ]
+    },
+    {
+      "lookup_key": "weekly_pass",
+      "display_name": "Weekly Pass",
+      "position": 3,
+      "product_keys": [
+        "weekly_pass"
+      ]
+    },
+    {
+      "lookup_key": "remove_ads",
+      "display_name": "Remove Ads",
+      "position": 4,
+      "product_keys": [
+        "remove_ads"
+      ]
+    }
+  ]
+}
