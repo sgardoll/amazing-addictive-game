@@ -29,7 +29,7 @@
         "gems_100": "gems_100",
         "gems_500": "gems_500",
         "gems_1500": "gems_1500",
-        "weekly_pass": "weekly_pass",
+        "weekly_pass": "weekly_pass:weekly-pass-baseplan",
         "remove_ads": "remove_ads"
       }
     }

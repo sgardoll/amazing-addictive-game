@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.mindsort.mindsort"
+    namespace = "com.connectio.mindsweeper"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,13 +30,18 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.mindsort.mindsort"
+        applicationId = "com.connectio.mindsweeper"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue(
+            "string",
+            "google_play_rsa_public_key",
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8r0Cvpr++JXBx4TAXEhSoHg8H9u+0tVhwZIukpYPNZeKuBPxRSEeYeAOfKkpTuZKHUiunBQn/nY2DCqTorSu63gXDGEA94N4VyQ6ZAwM8FUHut8maGiJQl/q7RFT98xwihyngByCwz0DpYVt9WzXHBrX/jSiMPBZIDG+PR+wDdFMym/7MZ1oUS+96uF9BlQlvl5r7Zy6RC1O1H1MXe4PrpfBjIA8tVH5dxZS6sVBwuqYxBpEadX0Zo4Aloxz4CxGsuhLj59TghChd3pnMje51Bkdu5EW3Y84JWK9xQyC+EylEUoAyac8f+h9w559aAt/Ax8E8mMHPvQk0AxzjI1wZwIDAQAB",
+        )
     }
 
     signingConfigs {

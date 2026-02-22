@@ -30,6 +30,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+            android:name="com.connectio.mindsweeper.GOOGLE_PLAY_RSA_PUBLIC_KEY"
+            android:value="@string/google_play_rsa_public_key" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

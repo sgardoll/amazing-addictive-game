@@ -401,7 +401,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   _shopItem(
                     context,
                     title: 'Weekly Pass',
-                    price: r'$2.99/week',
+                    price: 'US\$2.99/week',
                     onTap: () async {
                       await ref
                           .read(iapControllerProvider.notifier)

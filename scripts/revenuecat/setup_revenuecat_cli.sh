@@ -254,11 +254,11 @@ attach_products_to_entitlement() {
 }
 
 attach_products_to_package() {
-  local _project_id="$1"
+  local project_id="$1"
   local package_id="$2"
   local product_ids_json="$3"
-  request POST "/packages/$package_id/actions/attach_products" \
-    "$(jq -n --argjson ids "$product_ids_json" '{product_ids:$ids}')" >/dev/null
+  request POST "/projects/$project_id/packages/$package_id/actions/attach_products" \
+    "$(jq -n --argjson ids "$product_ids_json" '{products: ($ids | map({product_id: ., eligibility_criteria: "all"}))}')" >/dev/null
 }
 
 resolve_product_ids_from_keys() {
