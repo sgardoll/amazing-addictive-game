@@ -26,11 +26,11 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter build apk --release
+      - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
 
   apple:
     runs-on: macos-latest
@@ -73,6 +73,6 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/android-apk/app-release.apk
+            dist/android-aab/app-release.aab
             dist/ios-app/ios-runner-app.zip
             dist/macos-app/macos-app.zip
