@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindsort/core/providers/game_controller.dart';
+import 'package:flutter/services.dart';
+import 'package:mindsort/core/providers/iap_controller.dart';
+import 'package:mindsort/core/providers/settings_controller.dart';
 import 'package:mindsort/features/game/widgets/emotion_bottle.dart';
 
 class GameBoard extends ConsumerWidget {
@@ -9,6 +12,7 @@ class GameBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(gameControllerProvider);
+    final settings = ref.watch(settingsControllerProvider);
     final bottles = state.gameState.bottles;
 
     if (bottles.isEmpty) {
@@ -30,6 +34,12 @@ class GameBoard extends ConsumerWidget {
               bottle: bottle,
               isSelected: isSelected,
               onTap: () {
+                if (settings.hapticsEnabled) {
+                  HapticFeedback.selectionClick();
+                }
+                if (settings.soundEnabled) {
+                  SystemSound.play(SystemSoundType.click);
+                }
                 ref.read(gameControllerProvider.notifier).onBottleTap(index);
               },
             );
@@ -109,6 +119,8 @@ class GameControls extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(gameControllerProvider);
+    final iapState = ref.watch(iapControllerProvider);
+    final settings = ref.watch(settingsControllerProvider);
     final canUndo = state.gameState.canUndo;
 
     return Container(
@@ -120,26 +132,46 @@ class GameControls extends ConsumerWidget {
             icon: Icons.undo,
             label: 'Undo',
             onPressed: canUndo
-                ? () => ref.read(gameControllerProvider.notifier).undo()
+                ? () {
+                    _runFeedback(settings);
+                    if (iapState.hasWeeklyPass ||
+                        ref
+                            .read(iapControllerProvider.notifier)
+                            .spendGems(10)) {
+                      ref.read(gameControllerProvider.notifier).undo();
+                    }
+                  }
                 : null,
           ),
           _buildControlButton(
             icon: Icons.refresh,
             label: 'Restart',
-            onPressed: () =>
-                ref.read(gameControllerProvider.notifier).restartLevel(),
+            onPressed: () {
+              _runFeedback(settings);
+              ref.read(gameControllerProvider.notifier).restartLevel();
+            },
           ),
           _buildControlButton(
             icon: Icons.lightbulb_outline,
             label: 'Hint',
-            onPressed: () =>
-                ref.read(gameControllerProvider.notifier).useHint(),
+            onPressed: () {
+              _runFeedback(settings);
+              if (iapState.hasWeeklyPass ||
+                  ref.read(iapControllerProvider.notifier).spendGems(25)) {
+                ref.read(gameControllerProvider.notifier).useHint();
+              }
+            },
           ),
           _buildControlButton(
             icon: Icons.add_circle_outline,
             label: 'Add Bottle',
-            onPressed: () =>
-                ref.read(gameControllerProvider.notifier).addBottle(),
+            onPressed: () {
+              _runFeedback(settings);
+              if (iapState.hasWeeklyPass ||
+                  ref.read(iapControllerProvider.notifier).spendGems(50)) {
+                ref.read(gameControllerProvider.notifier).addBottle();
+              }
+            },
           ),
         ],
       ),
@@ -169,5 +201,14 @@ class GameControls extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  void _runFeedback(SettingsState settings) {
+    if (settings.hapticsEnabled) {
+      HapticFeedback.selectionClick();
+    }
+    if (settings.soundEnabled) {
+      SystemSound.play(SystemSoundType.click);
+    }
   }
 }

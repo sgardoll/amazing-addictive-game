@@ -4,6 +4,7 @@ import 'package:mindsort/core/providers/achievement_controller.dart';
 import 'package:mindsort/core/providers/daily_challenge_controller.dart';
 import 'package:mindsort/core/providers/game_controller.dart';
 import 'package:mindsort/core/providers/iap_controller.dart';
+import 'package:mindsort/core/providers/settings_controller.dart';
 import 'package:mindsort/core/services/revenuecat_service.dart';
 import 'package:mindsort/features/game/widgets/game_board.dart';
 import 'package:confetti/confetti.dart';
@@ -12,21 +13,21 @@ void main() {
   runApp(const ProviderScope(child: MindSortApp()));
 }
 
-class MindSortApp extends StatelessWidget {
+class MindSortApp extends ConsumerWidget {
   const MindSortApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsControllerProvider);
     return MaterialApp(
       title: 'MindSort',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF6366F1),
-          brightness: Brightness.dark,
+          brightness: settings.darkMode ? Brightness.dark : Brightness.light,
         ),
         useMaterial3: true,
-        fontFamily: 'Poppins',
       ),
       home: const GameScreen(),
     );
@@ -55,6 +56,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ref.read(iapControllerProvider.notifier).initialize();
       ref.read(dailyChallengeProvider.notifier).initialize();
       ref.read(achievementControllerProvider.notifier).initialize();
+      ref.read(settingsControllerProvider.notifier).initialize();
     });
   }
 
@@ -190,12 +192,69 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => _openSettings(context),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  void _openSettings(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF1F1B4B),
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final settings = ref.watch(settingsControllerProvider);
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Settings',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    value: settings.soundEnabled,
+                    onChanged: (value) => ref
+                        .read(settingsControllerProvider.notifier)
+                        .setSoundEnabled(value),
+                    title: const Text(
+                      'Sound',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: settings.hapticsEnabled,
+                    onChanged: (value) => ref
+                        .read(settingsControllerProvider.notifier)
+                        .setHapticsEnabled(value),
+                    title: const Text(
+                      'Haptics',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: settings.darkMode,
+                    onChanged: (value) => ref
+                        .read(settingsControllerProvider.notifier)
+                        .setDarkMode(value),
+                    title: const Text(
+                      'Dark Mode',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

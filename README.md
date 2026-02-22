@@ -1,16 +1,29 @@
-# mindsort
+# MindSort
 
-A new Flutter project.
+Emotion-sorting puzzle game built with Flutter.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Build
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+flutter build apk --release --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build ios --simulator --no-codesign --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build web --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build macos --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build linux --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build windows --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## RevenueCat Product IDs
+
+- gems_100
+- gems_500
+- gems_1500
+- weekly_pass
+- remove_ads

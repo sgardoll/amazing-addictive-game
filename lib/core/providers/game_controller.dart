@@ -238,7 +238,28 @@ class GameController extends StateNotifier<GameControllerState> {
     }
   }
 
-  void useHint() {}
+  void useHint() {
+    final bottles = state.gameState.bottles;
+    final hintsUsed = state.gameState.hintsUsed;
+    for (int from = 0; from < bottles.length; from++) {
+      if (bottles[from].isEmpty) {
+        continue;
+      }
+      for (int to = 0; to < bottles.length; to++) {
+        if (from == to) {
+          continue;
+        }
+        if (bottles[from].canPourTo(bottles[to])) {
+          selectBottle(from);
+          selectBottle(to);
+          state = state.copyWith(
+            gameState: state.gameState.copyWith(hintsUsed: hintsUsed + 1),
+          );
+          return;
+        }
+      }
+    }
+  }
 
   void onBottleTap(int bottleIndex) {
     selectBottle(bottleIndex);
