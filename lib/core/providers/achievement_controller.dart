@@ -52,7 +52,7 @@ class AchievementController extends StateNotifier<AchievementState> {
     final unlocked = {...state.unlocked};
     if (newCount >= 1) unlocked.add('first_harmony');
     if (newCount >= 10) unlocked.add('steady_mind');
-    if (newCount >= 50) unlocked.add('emotion_master');
+    if (newCount >= 50) unlocked.add('fast_food_master');
     await _save(state.copyWith(levelsCompleted: newCount, unlocked: unlocked));
   }
 

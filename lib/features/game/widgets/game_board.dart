@@ -4,7 +4,7 @@ import 'package:mindsort/core/providers/game_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:mindsort/core/providers/iap_controller.dart';
 import 'package:mindsort/core/providers/settings_controller.dart';
-import 'package:mindsort/features/game/widgets/emotion_bottle.dart';
+import 'package:mindsort/features/game/widgets/ingredient_tray.dart';
 
 class GameBoard extends ConsumerWidget {
   const GameBoard({super.key});
@@ -13,25 +13,41 @@ class GameBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(gameControllerProvider);
     final settings = ref.watch(settingsControllerProvider);
-    final bottles = state.gameState.bottles;
+    final trays = state.gameState.trays;
 
-    if (bottles.isEmpty) {
+    if (trays.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return Center(
-      child: Padding(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12),
         padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFB0BEC5), // Steel-like background
+          border: Border.all(
+            color: const Color(0xFF37474F),
+            width: 6,
+          ), // Rigid, dark border
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black54,
+              blurRadius: 10,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
         child: Wrap(
-          spacing: 16,
-          runSpacing: 24,
+          spacing: 8, // Tighter spacing for cluttered feel
+          runSpacing: 12,
           alignment: WrapAlignment.center,
-          children: List.generate(bottles.length, (index) {
-            final bottle = bottles[index];
-            final isSelected = state.gameState.selectedBottleIndex == index;
+          children: List.generate(trays.length, (index) {
+            final tray = trays[index];
+            final isSelected = state.gameState.selectedTrayIndex == index;
 
-            return EmotionBottle(
-              bottle: bottle,
+            return IngredientTray(
+              tray: tray,
               isSelected: isSelected,
               onTap: () {
                 if (settings.hapticsEnabled) {
@@ -40,7 +56,7 @@ class GameBoard extends ConsumerWidget {
                 if (settings.soundEnabled) {
                   SystemSound.play(SystemSoundType.click);
                 }
-                ref.read(gameControllerProvider.notifier).onBottleTap(index);
+                ref.read(gameControllerProvider.notifier).onTrayTap(index);
               },
             );
           }),
@@ -91,20 +107,32 @@ class GameHUD extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF263238), // Dark industrial grey
+        border: Border.all(
+          color: const Color(0xFFE53935),
+          width: 2,
+        ), // Urgent red border
+        borderRadius: BorderRadius.circular(4), // Rigid corners
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 4),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.white70),
-          const SizedBox(width: 4),
+          Icon(
+            icon,
+            size: 16,
+            color: const Color(0xFFFFB300),
+          ), // Warning yellow icons
+          const SizedBox(width: 6),
           Text(
             '$label: $value',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2, // Digital feel
             ),
           ),
         ],
@@ -164,12 +192,12 @@ class GameControls extends ConsumerWidget {
           ),
           _buildControlButton(
             icon: Icons.add_circle_outline,
-            label: 'Add Bottle',
+            label: 'Add Tray',
             onPressed: () {
               _runFeedback(settings);
               if (iapState.hasWeeklyPass ||
                   ref.read(iapControllerProvider.notifier).spendGems(50)) {
-                ref.read(gameControllerProvider.notifier).addBottle();
+                ref.read(gameControllerProvider.notifier).addTray();
               }
             },
           ),
@@ -186,17 +214,39 @@ class GameControls extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: Icon(icon),
-          onPressed: onPressed,
-          iconSize: 32,
-          color: onPressed != null ? Colors.white : Colors.white38,
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF37474F), // Industrial grey button
+            border: Border.all(
+              color: onPressed != null
+                  ? const Color(0xFFFFB300)
+                  : Colors.grey, // Warning yellow if active
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black45,
+                offset: Offset(0, 4),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: Icon(icon),
+            onPressed: onPressed,
+            iconSize: 28,
+            color: onPressed != null ? Colors.white : Colors.white38,
+          ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
             color: onPressed != null ? Colors.white70 : Colors.white24,
             fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
           ),
         ),
       ],
