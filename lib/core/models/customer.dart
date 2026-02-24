@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:mindsort/core/models/ingredient.dart';
+import 'package:order_panic/core/models/ingredient.dart';
 
 part 'customer.freezed.dart';
 

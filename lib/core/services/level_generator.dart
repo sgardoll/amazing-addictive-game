@@ -1,7 +1,7 @@
 import 'dart:math';
-import 'package:mindsort/core/models/tray.dart';
-import 'package:mindsort/core/models/ingredient.dart';
-import 'package:mindsort/core/models/level.dart';
+import 'package:order_panic/core/models/tray.dart';
+import 'package:order_panic/core/models/ingredient.dart';
+import 'package:order_panic/core/models/level.dart';
 
 class LevelGenerator {
   static List<Level> generateLevels({int count = 100}) {

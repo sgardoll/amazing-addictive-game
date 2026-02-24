@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindsort/core/providers/game_controller.dart';
+import 'package:order_panic/core/providers/game_controller.dart';
 import 'package:flutter/services.dart';
-import 'package:mindsort/core/providers/iap_controller.dart';
-import 'package:mindsort/core/providers/settings_controller.dart';
-import 'package:mindsort/core/models/tray.dart';
-import 'package:mindsort/features/game/widgets/ingredient_tray.dart';
-import 'package:mindsort/features/game/widgets/customer_view.dart';
+import 'package:order_panic/core/providers/iap_controller.dart';
+import 'package:order_panic/core/providers/settings_controller.dart';
+import 'package:order_panic/core/models/tray.dart';
+import 'package:order_panic/features/game/widgets/ingredient_tray.dart';
+import 'package:order_panic/features/game/widgets/customer_view.dart';
 
 class GameBoard extends ConsumerWidget {
   const GameBoard({super.key});

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mindsort/core/models/tray.dart';
-import 'package:mindsort/core/models/ingredient.dart';
+import 'package:order_panic/core/models/tray.dart';
+import 'package:order_panic/core/models/ingredient.dart';
 
 class IngredientTray extends StatefulWidget {
   const IngredientTray({
