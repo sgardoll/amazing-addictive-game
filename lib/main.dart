@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:order_panic/core/providers/achievement_controller.dart';
 import 'package:order_panic/core/providers/daily_challenge_controller.dart';
@@ -17,13 +19,6 @@ import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
-  if (!kIsWeb) {
-    // Show tracking authorization dialog and wait for response
-    await AppTrackingTransparency.requestTrackingAuthorization();
-  }
-
-  await MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MindSortApp()));
   FlutterNativeSplash.remove();
 }
@@ -73,6 +68,40 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ref.read(achievementControllerProvider.notifier).initialize();
       ref.read(settingsControllerProvider.notifier).initialize();
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initAdsAndTracking();
+    });
+  }
+
+  Future<void> _initAdsAndTracking() async {
+    if (!kIsWeb && (Platform.isIOS || Platform.isMacOS)) {
+      try {
+        final status =
+            await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          final newStatus =
+              await AppTrackingTransparency.requestTrackingAuthorization();
+          if (newStatus != TrackingStatus.authorized) {
+            // Apply non-personalized ads configuration if not authorized
+            await MobileAds.instance.updateRequestConfiguration(
+              RequestConfiguration(
+                tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.unspecified,
+              ), // Or other NPA flags if needed
+            );
+          }
+        } else if (status != TrackingStatus.authorized) {
+          await MobileAds.instance.updateRequestConfiguration(
+            RequestConfiguration(
+              tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.unspecified,
+            ),
+          );
+        }
+      } on PlatformException catch (_) {
+        // Fallback if ATT is unsupported or throws
+      }
+    }
+    await MobileAds.instance.initialize();
   }
 
   @override
