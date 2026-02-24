@@ -65,14 +65,20 @@ jobs:
           GAD_APP_ID: ${{ secrets.ADMOB_IOS_APP_ID }}
           REVENUECAT_APPLE_API_KEY: ${{ secrets.REVENUECAT_APPLE_API_KEY }}
           IOS_INTERSTITIAL_AD_UNIT_ID: ${{ secrets.IOS_INTERSTITIAL_AD_UNIT_ID }}
-        run: flutter build ios --release --no-codesign --dart-define=REVENUECAT_APPLE_API_KEY="$REVENUECAT_APPLE_API_KEY" --dart-define=IOS_INTERSTITIAL_AD_UNIT_ID="$IOS_INTERSTITIAL_AD_UNIT_ID"
+        run: |
+          echo "GAD_APP_ID=${GAD_APP_ID:-ca-app-pub-3940256099942544~1458002511}" >> ios/Flutter/Release.xcconfig
+          flutter build ios --release --no-codesign --dart-define=REVENUECAT_APPLE_API_KEY="$REVENUECAT_APPLE_API_KEY" --dart-define=IOS_INTERSTITIAL_AD_UNIT_ID="$IOS_INTERSTITIAL_AD_UNIT_ID"
       - run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app ios-runner-app.zip
 
       # macOS
       - name: Build macOS App
         env:
           REVENUECAT_APPLE_API_KEY: ${{ secrets.REVENUECAT_APPLE_API_KEY }}
-        run: flutter build macos --dart-define=REVENUECAT_APPLE_API_KEY="$REVENUECAT_APPLE_API_KEY"
+        run: |
+          mkdir -p macos/Flutter/ephemeral
+          touch macos/Flutter/ephemeral/FlutterInputs.xcfilelist
+          touch macos/Flutter/ephemeral/FlutterOutputs.xcfilelist
+          flutter build macos --dart-define=REVENUECAT_APPLE_API_KEY="$REVENUECAT_APPLE_API_KEY"
       - run: ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/*.app macos-app.zip
 
       - uses: actions/upload-artifact@v4
