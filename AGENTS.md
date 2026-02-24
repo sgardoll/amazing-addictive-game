@@ -5,7 +5,7 @@
 **Branch:** main
 
 ## OVERVIEW
-Mindsweeper (formerly MindSort) is a Flutter cross-platform puzzle game combining water-sort mechanics with mindfulness features, backed by RevenueCat for IAP and in-app economies.
+Order Panic: Food Frenzy is a Flutter cross-platform puzzle game combining water-sort mechanics with mindfulness features, backed by RevenueCat for IAP and in-app economies.
 
 ## STRUCTURE
 ```text

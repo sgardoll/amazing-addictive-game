@@ -1,6 +1,6 @@
-# MindSort
+# Order Panic: Food Frenzy
 
-Emotion-sorting puzzle game built with Flutter.
+A fun and colourful puzzle game built with Flutter.
 
 ## Run
 
