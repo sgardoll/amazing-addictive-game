@@ -159,11 +159,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   ) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 'Order Panic!',
@@ -179,11 +183,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ],
           ),
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
             children: [
               _buildGemCounter(iapState),
-              const SizedBox(width: 8),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: const Icon(
                   Icons.shopping_bag_outlined,
                   color: Colors.white,
@@ -191,6 +198,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openShop(context),
               ),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: Icon(
                   dailyState.claimedToday ? Icons.event_available : Icons.event,
                   color: Colors.white,
@@ -198,6 +207,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openDailyRewards(context),
               ),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
                 onPressed: () => _openSettings(context),
               ),
