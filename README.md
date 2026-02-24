@@ -1,6 +1,6 @@
-# MindSort
+# Order Panic: Food Frenzy
 
-Emotion-sorting puzzle game built with Flutter.
+A fun and colourful puzzle game built with Flutter.
 
 ## Run
 
@@ -10,7 +10,7 @@ flutter pub get
 export ADMOB_ANDROID_APP_ID="ca-app-pub-3940256099942544~3347511713"
 export GAD_APP_ID="ca-app-pub-3940256099942544~1458002511"
 
-flutter run --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter run --dart-define=REVENUECAT_APPLE_API_KEY=appl_xxx --dart-define=REVENUECAT_GOOGLE_API_KEY=goog_xxx
 ```
 
 ## Build
@@ -23,12 +23,12 @@ export GAD_APP_ID="ca-app-pub-xxx~zzz"
 ```
 
 ```bash
-flutter build apk --release --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build ios --simulator --no-codesign --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build web --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build macos --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build linux --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build windows --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build apk --release --dart-define=REVENUECAT_GOOGLE_API_KEY=goog_xxx
+flutter build ios --simulator --no-codesign --dart-define=REVENUECAT_APPLE_API_KEY=appl_xxx
+flutter build macos --dart-define=REVENUECAT_APPLE_API_KEY=appl_xxx
+flutter build web
+flutter build linux
+flutter build windows
 ```
 
 ## RevenueCat Product IDs

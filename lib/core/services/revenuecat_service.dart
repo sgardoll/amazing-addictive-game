@@ -2,7 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class RevenueCatService {
-  static const String _apiKey = String.fromEnvironment('REVENUECAT_API_KEY');
+  static String get _apiKey {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return const String.fromEnvironment('REVENUECAT_GOOGLE_API_KEY');
+    } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      return const String.fromEnvironment('REVENUECAT_APPLE_API_KEY');
+    }
+    return '';
+  }
 
   static const String gems100 = 'gems_100';
   static const String gems500 = 'gems_500';
