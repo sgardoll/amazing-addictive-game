@@ -17,6 +17,7 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MindSortApp()));
+  FlutterNativeSplash.remove();
 }
 
 class MindSortApp extends ConsumerWidget {
@@ -63,7 +64,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ref.read(dailyChallengeProvider.notifier).initialize();
       ref.read(achievementControllerProvider.notifier).initialize();
       ref.read(settingsControllerProvider.notifier).initialize();
-      FlutterNativeSplash.remove();
     });
   }
 
@@ -197,8 +197,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             children: [
               _buildGemCounter(iapState),
               IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
                 icon: const Icon(
                   Icons.shopping_bag_outlined,
                   color: Colors.white,
@@ -206,8 +204,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openShop(context),
               ),
               IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
                 icon: Icon(
                   dailyState.claimedToday ? Icons.event_available : Icons.event,
                   color: Colors.white,
@@ -215,8 +211,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openDailyRewards(context),
               ),
               IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
                 onPressed: () => _openSettings(context),
               ),
