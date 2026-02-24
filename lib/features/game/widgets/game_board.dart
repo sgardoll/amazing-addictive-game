@@ -44,42 +44,38 @@ class GameBoard extends ConsumerWidget {
         else
           const SizedBox(height: 100),
         const SizedBox(height: 20),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFB0BEC5), // Steel-like background
-                border: Border.all(
-                  color: const Color(0xFF37474F),
-                  width: 6,
-                ), // Rigid, dark border
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black54,
-                    blurRadius: 10,
-                    offset: Offset(0, 6),
-                  ),
-                ],
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFB0BEC5), // Steel-like background
+            border: Border.all(
+              color: const Color(0xFF37474F),
+              width: 6,
+            ), // Rigid, dark border
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 10,
+                offset: Offset(0, 6),
               ),
-              child: Wrap(
-                spacing: 8, // Tighter spacing for cluttered feel
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: List.generate(trays.length, (index) {
-                  final tray = trays[index];
-                  final isSelected = state.gameState.selectedTrayIndex == index;
+            ],
+          ),
+          child: Wrap(
+            spacing: 8, // Tighter spacing for cluttered feel
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: List.generate(trays.length, (index) {
+              final tray = trays[index];
+              final isSelected = state.gameState.selectedTrayIndex == index;
 
-                  return IngredientTray(
-                    tray: tray,
-                    isSelected: isSelected,
-                    onTap: () => _handleTrayTap(ref, index, tray, settings),
-                  );
-                }),
-              ),
-            ),
+              return IngredientTray(
+                tray: tray,
+                isSelected: isSelected,
+                onTap: () => _handleTrayTap(ref, index, tray, settings),
+              );
+            }),
           ),
         ),
       ],

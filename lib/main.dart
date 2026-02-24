@@ -118,13 +118,21 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ),
             child: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(context, state, iapState, dailyState),
-                  const GameHUD(),
-                  const Expanded(child: GameBoard()),
-                  const GameControls(),
-                  const SizedBox(height: 16),
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        _buildHeader(context, state, iapState, dailyState),
+                        const GameHUD(),
+                        const GameBoard(),
+                        const Spacer(), // Pushes controls to the bottom if there's extra space
+                        const GameControls(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
