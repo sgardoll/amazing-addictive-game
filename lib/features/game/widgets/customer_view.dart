@@ -8,9 +8,11 @@ class CustomerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final patienceRatio = customer.currentPatience / customer.maxPatience;
-    final color = patienceRatio > 0.5 
-        ? Colors.green 
+    final double patienceRatio = customer.maxPatience > 0
+        ? (customer.currentPatience / customer.maxPatience).clamp(0.0, 1.0)
+        : 0.0;
+    final color = patienceRatio > 0.5
+        ? Colors.green
         : (patienceRatio > 0.25 ? Colors.orange : Colors.red);
 
     return Container(

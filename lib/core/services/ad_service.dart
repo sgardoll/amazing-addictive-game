@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/foundation.dart';
@@ -6,23 +5,32 @@ import 'package:flutter/foundation.dart';
 class AdService {
   InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
-  
+
   static String get _interstitialAdUnitId {
-    if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/1033173712';
-    } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/4411468910';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return const String.fromEnvironment(
+        'ANDROID_INTERSTITIAL_AD_UNIT_ID',
+        defaultValue: 'ca-app-pub-3940256099942544/1033173712',
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return const String.fromEnvironment(
+        'IOS_INTERSTITIAL_AD_UNIT_ID',
+        defaultValue: 'ca-app-pub-3940256099942544/4411468910',
+      );
     }
-    // Default fallback or throw if not supported
+    // Default fallback
     return 'ca-app-pub-3940256099942544/1033173712';
   }
 
   Future<void> initialize() async {
+    if (kIsWeb) return;
     await MobileAds.instance.initialize();
   }
 
   void loadInterstitialAd() {
-    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.android &&
+            defaultTargetPlatform != TargetPlatform.iOS)) {
       return;
     }
 
@@ -33,7 +41,7 @@ class AdService {
         onAdLoaded: (ad) {
           _interstitialAd = ad;
           _isAdLoaded = true;
-          
+
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               ad.dispose();

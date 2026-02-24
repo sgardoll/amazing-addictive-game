@@ -188,11 +188,11 @@ class GameController extends StateNotifier<GameControllerState> {
     final List<Customer> updatedCustomers = [];
 
     for (final customer in state.gameState.activeCustomers) {
-      final newPatience = customer.currentPatience - 1;
-      if (newPatience <= 0) {
+      final clampedPatience = max(0, customer.currentPatience - 1);
+      if (clampedPatience <= 0) {
         gameOver = true;
       }
-      updatedCustomers.add(customer.copyWith(currentPatience: newPatience));
+      updatedCustomers.add(customer.copyWith(currentPatience: clampedPatience));
     }
 
     if (gameOver) {

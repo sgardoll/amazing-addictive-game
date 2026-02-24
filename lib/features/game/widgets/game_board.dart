@@ -28,13 +28,15 @@ class GameBoard extends ConsumerWidget {
           Container(
             height: 100,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: customers
-                    .map((c) => CustomerView(customer: c))
-                    .toList(),
+            child: Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: customers
+                      .map((c) => CustomerView(customer: c))
+                      .toList(),
+                ),
               ),
             ),
           )
