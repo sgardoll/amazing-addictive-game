@@ -50,7 +50,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
+- [x] 04-01: AdMob Interstitial Integration
 
 ## Progress
 
@@ -59,4 +59,4 @@ Plans:
 | 1. Kill the Thematic Dissonance | v2.0 | 2/2 | Complete | 2026-02-24 |
 | 2. Inject the Chaos Engine | v2.0 | 1/1 | Complete | 2026-02-24 |
 | 3. Rewrite the Resolution Logic | v2.0 | 1/1 | Complete | 2026-02-24 |
-| 4. Weaponise the Monetization Strategy | v2.0 | 0/? | Not started | - |
+| 4. Weaponise the Monetization Strategy | v2.0 | 1/? | In progress | - |

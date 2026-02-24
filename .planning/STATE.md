@@ -2,12 +2,12 @@
 
 ## Current Position
 
-Phase: 3 of 4 (Rewrite the Resolution Logic)
+Phase: 4 of 4 (Weaponise the Monetization Strategy)
 Plan: 1 of 2 in current phase
 Status: In progress
-Last activity: 2026-02-24 - Executed plan 03-01
+Last activity: 2026-02-24 - Executed plan 04-01
 
-Progress: █████████░ 90%
+Progress: ██████████░ 95%
 
 ## Accumulated Context
 
@@ -19,6 +19,8 @@ Progress: █████████░ 90%
 | 2 | Implemented Customer as an immutable class with copyWith method. | Simplicity and consistency with GameStateData. |
 | 2 | Integrated a periodic Timer in GameController to implement real-time decay mechanics instead of sequential turn mechanics. | Shift from pure turn-based puzzle to real-time action puzzle. |
 | 3 | Clear history array upon serving a tray to prevent exploit allowing players to undo a successful serve and duplicate score. | `serveTray` permanently logs score, reversing time shouldn't duplicate points. |
+| 4 | Added MobileAds.instance.initialize() directly in main() before runApp for earliest possible initialization. | Early init is standard practice for mobile ads to cache correctly. |
+| 4 | AdService reloads a new interstitial ad automatically after it is dismissed. | Ensures the next game over is ready to serve an ad without delay. |
 
 ### Blocker / Concerns
 
@@ -31,6 +33,6 @@ Progress: █████████░ 90%
 
 ## Session Continuity
 
-Last session: 2026-02-24 16:48:00 AEDT
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-02-24 17:00:00 AEDT
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
