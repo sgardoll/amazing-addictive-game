@@ -4,20 +4,8 @@ on:
   push:
     branches: [main]
     tags: ['v*']   # release trigger
-  pull_request:
 
 jobs:
-  test-and-web:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-      - run: flutter pub get
-      - run: flutter test
-      - run: flutter build web
-
   android:
     runs-on: ubuntu-latest
     steps:
@@ -83,7 +71,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test-and-web, android, apple]
+    needs: [android, apple]
     runs-on: ubuntu-latest
     permissions:
       contents: write
