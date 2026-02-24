@@ -131,12 +131,16 @@ class GameController extends StateNotifier<GameControllerState> {
   Timer? _gameTicker;
   final Random _random = Random();
   int _ticksSinceLastCustomer = 0;
+  bool _adShown = false;
 
   GameController(this._adService) : super(GameControllerState.initial());
 
   @override
   void dispose() {
-    _gameTicker?.cancel();
+    if (_gameTicker != null) {
+      _gameTicker!.cancel();
+      _gameTicker = null;
+    }
     super.dispose();
   }
 
@@ -162,6 +166,7 @@ class GameController extends StateNotifier<GameControllerState> {
       isLoading: false,
     );
 
+    _adShown = false;
     _adService.loadInterstitialAd();
     _startGameTicker();
   }
@@ -192,9 +197,15 @@ class GameController extends StateNotifier<GameControllerState> {
 
     if (gameOver) {
       if (!state.gameState.isGameOver) {
-        _adService.showInterstitialAd();
+        if (!_adShown) {
+          _adShown = true;
+          _adService.showInterstitialAd();
+        }
       }
-      _gameTicker?.cancel();
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
       state = state.copyWith(
         gameState: state.gameState.copyWith(
           activeCustomers: updatedCustomers,
@@ -293,6 +304,9 @@ class GameController extends StateNotifier<GameControllerState> {
     final ingredient = tray.top!;
     final customers = state.gameState.activeCustomers.toList();
 
+    // Selection relies on collection order. Since customers are appended to
+    // the list on arrival, the first matching customer (lowest index)
+    // represents the oldest matching customer waiting.
     final customerIndex = customers.indexWhere((c) => c.order == ingredient);
     if (customerIndex != -1) {
       customers.removeAt(customerIndex);
@@ -340,7 +354,11 @@ class GameController extends StateNotifier<GameControllerState> {
 
   void restartLevel() {
     if (state.currentLevel != null) {
-      _gameTicker?.cancel();
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
+      _adShown = false;
       state = state.copyWith(
         gameState: GameStateData(
           levelId: state.currentLevel!.id,
@@ -370,7 +388,11 @@ class GameController extends StateNotifier<GameControllerState> {
     }
 
     if (nextLevel != null) {
-      _gameTicker?.cancel();
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
+      _adShown = false;
       state = state.copyWith(
         gameState: GameStateData(
           levelId: nextLevel.id,

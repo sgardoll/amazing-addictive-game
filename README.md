@@ -6,10 +6,20 @@ Emotion-sorting puzzle game built with Flutter.
 
 ```bash
 flutter pub get
+# Inject AdMob IDs (defaults to test IDs if env vars not set)
+bash scripts/inject_admob_ids.sh
 flutter run --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
 ```
 
 ## Build
+
+Before building for release, inject your production AdMob IDs:
+
+```bash
+export ADMOB_ANDROID_APP_ID="ca-app-pub-xxx~yyy"
+export ADMOB_IOS_APP_ID="ca-app-pub-xxx~zzz"
+bash scripts/inject_admob_ids.sh
+```
 
 ```bash
 flutter build apk --release --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
