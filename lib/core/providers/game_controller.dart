@@ -7,6 +7,7 @@ import 'package:mindsort/core/models/ingredient.dart';
 import 'package:mindsort/core/models/tray.dart';
 import 'package:mindsort/core/models/level.dart';
 import 'package:mindsort/core/services/level_generator.dart';
+import 'package:mindsort/core/services/ad_service.dart';
 
 class GameStateData {
   final int levelId;
@@ -126,11 +127,12 @@ class GameControllerState {
 }
 
 class GameController extends StateNotifier<GameControllerState> {
+  final AdService _adService;
   Timer? _gameTicker;
   final Random _random = Random();
   int _ticksSinceLastCustomer = 0;
 
-  GameController() : super(GameControllerState.initial());
+  GameController(this._adService) : super(GameControllerState.initial());
 
   @override
   void dispose() {
@@ -160,6 +162,7 @@ class GameController extends StateNotifier<GameControllerState> {
       isLoading: false,
     );
 
+    _adService.loadInterstitialAd();
     _startGameTicker();
   }
 
@@ -188,6 +191,9 @@ class GameController extends StateNotifier<GameControllerState> {
     }
 
     if (gameOver) {
+      if (!state.gameState.isGameOver) {
+        _adService.showInterstitialAd();
+      }
       _gameTicker?.cancel();
       state = state.copyWith(
         gameState: state.gameState.copyWith(
@@ -451,5 +457,6 @@ class GameController extends StateNotifier<GameControllerState> {
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameControllerState>((ref) {
-      return GameController();
+      final adService = ref.watch(adServiceProvider);
+      return GameController(adService);
     });
