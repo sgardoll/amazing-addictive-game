@@ -24,7 +24,7 @@ class MindSortApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsControllerProvider);
     return MaterialApp(
-      title: 'MindSort',
+      title: 'Order Panic: Food Frenzy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -163,7 +163,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'MindSort',
+                'Order Panic!',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

@@ -47,7 +47,14 @@ dev_dependencies:
   riverpod_generator: ^2.6.2
   freezed: ^2.5.7
   json_serializable: ^6.9.0
+  flutter_native_splash: ^2.4.0
 
+flutter_native_splash:
+  color: "#000000"
+  background_image: "assets/splash.jpg"
+  android_12:
+    background_image: "assets/splash.jpg"
+  fullscreen: true
 
 flutter:
   uses-material-design: true
