@@ -294,7 +294,6 @@ class GameController extends StateNotifier<GameControllerState> {
       final newTrays = List<Tray>.from(trays);
       newTrays[trayIndex] = tray.copyWith(contents: []);
 
-      final newHistory = [...state.gameState.history, trays];
       final newServed = state.gameState.customersServed + 1;
 
       state = state.copyWith(
@@ -302,7 +301,8 @@ class GameController extends StateNotifier<GameControllerState> {
           activeCustomers: customers,
           trays: newTrays,
           customersServed: newServed,
-          history: newHistory,
+          history:
+              [], // Clear history to prevent undoing a serve and duplicating score
           clearSelection: state.gameState.selectedTrayIndex == trayIndex,
         ),
       );
