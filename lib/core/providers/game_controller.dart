@@ -20,6 +20,8 @@ class GameStateData {
   final bool showHint;
   final List<Customer> activeCustomers;
   final bool isGameOver;
+  final int customersServed;
+  final int targetCustomers;
 
   const GameStateData({
     required this.levelId,
@@ -33,6 +35,8 @@ class GameStateData {
     this.showHint = false,
     this.activeCustomers = const [],
     this.isGameOver = false,
+    this.customersServed = 0,
+    this.targetCustomers = 5,
   });
 
   GameStateData copyWith({
@@ -48,6 +52,8 @@ class GameStateData {
     bool? showHint,
     List<Customer>? activeCustomers,
     bool? isGameOver,
+    int? customersServed,
+    int? targetCustomers,
   }) {
     return GameStateData(
       levelId: levelId ?? this.levelId,
@@ -63,6 +69,8 @@ class GameStateData {
       showHint: showHint ?? this.showHint,
       activeCustomers: activeCustomers ?? this.activeCustomers,
       isGameOver: isGameOver ?? this.isGameOver,
+      customersServed: customersServed ?? this.customersServed,
+      targetCustomers: targetCustomers ?? this.targetCustomers,
     );
   }
 
@@ -146,6 +154,8 @@ class GameController extends StateNotifier<GameControllerState> {
         parMoves: currentLevel.parMoves,
         activeCustomers: [],
         isGameOver: false,
+        customersServed: 0,
+        targetCustomers: 5,
       ),
       isLoading: false,
     );
@@ -261,10 +271,44 @@ class GameController extends StateNotifier<GameControllerState> {
             history: newHistory,
           ),
         );
+      }
+    }
+  }
 
-        if (_checkWin(newTrays)) {
-          _handleWin();
-        }
+  void serveTray(int trayIndex) {
+    if (state.isWon || state.gameState.isGameOver) return;
+
+    final trays = state.gameState.trays;
+    if (trayIndex < 0 || trayIndex >= trays.length) return;
+
+    final tray = trays[trayIndex];
+    if (!tray.isComplete || tray.isEmpty) return;
+
+    final ingredient = tray.top!;
+    final customers = state.gameState.activeCustomers.toList();
+
+    final customerIndex = customers.indexWhere((c) => c.order == ingredient);
+    if (customerIndex != -1) {
+      customers.removeAt(customerIndex);
+
+      final newTrays = List<Tray>.from(trays);
+      newTrays[trayIndex] = tray.copyWith(contents: []);
+
+      final newHistory = [...state.gameState.history, trays];
+      final newServed = state.gameState.customersServed + 1;
+
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(
+          activeCustomers: customers,
+          trays: newTrays,
+          customersServed: newServed,
+          history: newHistory,
+          clearSelection: state.gameState.selectedTrayIndex == trayIndex,
+        ),
+      );
+
+      if (_checkWin()) {
+        _handleWin();
       }
     }
   }
@@ -300,6 +344,8 @@ class GameController extends StateNotifier<GameControllerState> {
           isWon: false,
           activeCustomers: [],
           isGameOver: false,
+          customersServed: 0,
+          targetCustomers: state.gameState.targetCustomers,
         ),
         isWon: false,
       );
@@ -328,6 +374,8 @@ class GameController extends StateNotifier<GameControllerState> {
           isWon: false,
           activeCustomers: [],
           isGameOver: false,
+          customersServed: 0,
+          targetCustomers: state.gameState.targetCustomers,
         ),
         currentLevel: nextLevel,
         isWon: false,
@@ -388,8 +436,8 @@ class GameController extends StateNotifier<GameControllerState> {
     return tray.copyWith(contents: newContents);
   }
 
-  bool _checkWin(List<Tray> trays) {
-    return trays.every((tray) => tray.isComplete || tray.isEmpty);
+  bool _checkWin() {
+    return state.gameState.customersServed >= state.gameState.targetCustomers;
   }
 
   void _handleWin() {
