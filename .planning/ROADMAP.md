@@ -39,7 +39,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01: Rewrite Resolution Logic
 
 #### Phase 4: Weaponise the Monetization Strategy
 
@@ -57,6 +57,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Kill the Thematic Dissonance | v2.0 | 2/2 | Complete | 2026-02-24 |
-| 2. Inject the Chaos Engine | v2.0 | 0/? | Not started | - |
-| 3. Rewrite the Resolution Logic | v2.0 | 0/? | Not started | - |
+| 2. Inject the Chaos Engine | v2.0 | 1/1 | Complete | 2026-02-24 |
+| 3. Rewrite the Resolution Logic | v2.0 | 1/1 | Complete | 2026-02-24 |
 | 4. Weaponise the Monetization Strategy | v2.0 | 0/? | Not started | - |

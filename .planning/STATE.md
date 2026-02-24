@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 2 of 4 (Inject the Chaos Engine)
-Plan: 1 of 4 in current phase
+Phase: 3 of 4 (Rewrite the Resolution Logic)
+Plan: 1 of 2 in current phase
 Status: In progress
-Last activity: 2026-02-24 - Executed plan 02-01
+Last activity: 2026-02-24 - Executed plan 03-01
 
 Progress: █████████░ 90%
 
@@ -18,6 +18,7 @@ Progress: █████████░ 90%
 | 1 | Fast-food aesthetic implemented | Shifted calm purples to urgent reds/yellows, removed fluid animations for discrete item stacks. |
 | 2 | Implemented Customer as an immutable class with copyWith method. | Simplicity and consistency with GameStateData. |
 | 2 | Integrated a periodic Timer in GameController to implement real-time decay mechanics instead of sequential turn mechanics. | Shift from pure turn-based puzzle to real-time action puzzle. |
+| 3 | Clear history array upon serving a tray to prevent exploit allowing players to undo a successful serve and duplicate score. | `serveTray` permanently logs score, reversing time shouldn't duplicate points. |
 
 ### Blocker / Concerns
 
@@ -30,6 +31,6 @@ Progress: █████████░ 90%
 
 ## Session Continuity
 
-Last session: 2026-02-24 16:44:00 AEDT
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-02-24 16:48:00 AEDT
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
