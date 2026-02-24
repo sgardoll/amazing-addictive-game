@@ -9,10 +9,12 @@ import 'package:mindsort/core/services/revenuecat_service.dart';
 import 'package:mindsort/features/game/widgets/game_board.dart';
 import 'package:confetti/confetti.dart';
 
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MindSortApp()));
 }
@@ -24,7 +26,7 @@ class MindSortApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsControllerProvider);
     return MaterialApp(
-      title: 'MindSort',
+      title: 'Order Panic: Food Frenzy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -61,6 +63,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ref.read(dailyChallengeProvider.notifier).initialize();
       ref.read(achievementControllerProvider.notifier).initialize();
       ref.read(settingsControllerProvider.notifier).initialize();
+      FlutterNativeSplash.remove();
     });
   }
 
@@ -115,13 +118,21 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ),
             child: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(context, state, iapState, dailyState),
-                  const GameHUD(),
-                  const Expanded(child: GameBoard()),
-                  const GameControls(),
-                  const SizedBox(height: 16),
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        _buildHeader(context, state, iapState, dailyState),
+                        const GameHUD(),
+                        const GameBoard(),
+                        const Spacer(), // Pushes controls to the bottom if there's extra space
+                        const GameControls(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -156,14 +167,18 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   ) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'MindSort',
+                'Order Panic!',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -176,11 +191,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ],
           ),
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
             children: [
               _buildGemCounter(iapState),
-              const SizedBox(width: 8),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: const Icon(
                   Icons.shopping_bag_outlined,
                   color: Colors.white,
@@ -188,6 +206,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openShop(context),
               ),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: Icon(
                   dailyState.claimedToday ? Icons.event_available : Icons.event,
                   color: Colors.white,
@@ -195,6 +215,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 onPressed: () => _openDailyRewards(context),
               ),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
                 onPressed: () => _openSettings(context),
               ),

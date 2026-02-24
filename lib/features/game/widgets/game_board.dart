@@ -4,6 +4,7 @@ import 'package:mindsort/core/providers/game_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:mindsort/core/providers/iap_controller.dart';
 import 'package:mindsort/core/providers/settings_controller.dart';
+import 'package:mindsort/core/models/tray.dart';
 import 'package:mindsort/features/game/widgets/ingredient_tray.dart';
 import 'package:mindsort/features/game/widgets/customer_view.dart';
 
@@ -72,26 +73,29 @@ class GameBoard extends ConsumerWidget {
               return IngredientTray(
                 tray: tray,
                 isSelected: isSelected,
-                onTap: () {
-                  if (settings.hapticsEnabled) {
-                    HapticFeedback.selectionClick();
-                  }
-                  if (settings.soundEnabled) {
-                    SystemSound.play(SystemSoundType.click);
-                  }
-
-                  if (tray.isComplete) {
-                    ref.read(gameControllerProvider.notifier).serveTray(index);
-                  } else {
-                    ref.read(gameControllerProvider.notifier).onTrayTap(index);
-                  }
-                },
+                onTap: () => _handleTrayTap(ref, index, tray, settings),
               );
             }),
           ),
         ),
       ],
     );
+  }
+
+  void _handleTrayTap(
+    WidgetRef ref,
+    int index,
+    Tray tray,
+    SettingsState settings,
+  ) {
+    if (settings.hapticsEnabled) {
+      HapticFeedback.selectionClick();
+    }
+    if (settings.soundEnabled) {
+      SystemSound.play(SystemSoundType.click);
+    }
+
+    ref.read(gameControllerProvider.notifier).onTrayTap(index);
   }
 }
 
@@ -105,8 +109,10 @@ class GameHUD extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.spaceEvenly,
+        spacing: 8,
+        runSpacing: 8,
         children: [
           _buildStatChip(
             icon: Icons.layers,
