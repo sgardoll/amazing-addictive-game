@@ -25,10 +25,10 @@ export GAD_APP_ID="ca-app-pub-xxx~zzz"
 ```bash
 flutter build apk --release --dart-define=REVENUECAT_GOOGLE_API_KEY=goog_xxx
 flutter build ios --simulator --no-codesign --dart-define=REVENUECAT_APPLE_API_KEY=appl_xxx
-flutter build web --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build macos --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build linux --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
-flutter build windows --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
+flutter build macos --dart-define=REVENUECAT_APPLE_API_KEY=appl_xxx
+flutter build web
+flutter build linux
+flutter build windows
 ```
 
 ## RevenueCat Product IDs
