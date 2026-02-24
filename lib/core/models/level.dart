@@ -1,21 +1,21 @@
-import 'bottle.dart';
-import 'emotion.dart';
+import 'tray.dart';
+import 'ingredient.dart';
 
 class Level {
   Level({
     required this.id,
-    required this.bottles,
+    required this.trays,
     required this.parMoves,
     this.starThresholds = const [1.0, 0.8, 0.6],
   });
 
   final int id;
-  final List<Bottle> bottles;
+  final List<Tray> trays;
   final int parMoves;
   final List<double> starThresholds;
 
-  int get bottleCount => bottles.length;
-  int get capacity => bottles.first.capacity;
+  int get trayCount => trays.length;
+  int get capacity => trays.first.capacity;
 
   int calculateStars(int moves) {
     final ratio = moves / parMoves;
@@ -28,12 +28,12 @@ class Level {
   bool get isSolvable => _checkSolvable();
 
   bool _checkSolvable() {
-    final allContents = bottles.expand((b) => b.contents).toList();
-    final emotionCounts = <Emotion, int>{};
-    for (final emotion in allContents) {
-      emotionCounts[emotion] = (emotionCounts[emotion] ?? 0) + 1;
+    final allContents = trays.expand((b) => b.contents).toList();
+    final ingredientCounts = <Ingredient, int>{};
+    for (final ingredient in allContents) {
+      ingredientCounts[ingredient] = (ingredientCounts[ingredient] ?? 0) + 1;
     }
-    for (final count in emotionCounts.values) {
+    for (final count in ingredientCounts.values) {
       if (count % capacity != 0) return false;
     }
     return true;

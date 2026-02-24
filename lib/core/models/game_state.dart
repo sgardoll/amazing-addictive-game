@@ -1,46 +1,46 @@
-import 'bottle.dart';
+import 'tray.dart';
 
 class GameStateData {
   final int levelId;
-  final List<Bottle> bottles;
+  final List<Tray> trays;
   final int moves;
   final int parMoves;
   final bool isWon;
-  final Bottle? selectedBottle;
-  final List<List<Bottle>> history;
+  final Tray? selectedTray;
+  final List<List<Tray>> history;
 
   const GameStateData({
     required this.levelId,
-    required this.bottles,
+    required this.trays,
     required this.moves,
     required this.parMoves,
     required this.isWon,
-    this.selectedBottle,
+    this.selectedTray,
     this.history = const [],
   });
 
   GameStateData copyWith({
     int? levelId,
-    List<Bottle>? bottles,
+    List<Tray>? trays,
     int? moves,
     int? parMoves,
     bool? isWon,
-    Bottle? selectedBottle,
-    List<List<Bottle>>? history,
+    Tray? selectedTray,
+    List<List<Tray>>? history,
   }) {
     return GameStateData(
       levelId: levelId ?? this.levelId,
-      bottles: bottles ?? this.bottles,
+      trays: trays ?? this.trays,
       moves: moves ?? this.moves,
       parMoves: parMoves ?? this.parMoves,
       isWon: isWon ?? this.isWon,
-      selectedBottle: selectedBottle,
+      selectedTray: selectedTray,
       history: history ?? this.history,
     );
   }
 
   bool get canUndo => history.isNotEmpty;
-  int get completeBottles => bottles.where((b) => b.isComplete).length;
-  int get totalBottles => bottles.length;
-  double get progress => totalBottles > 0 ? completeBottles / totalBottles : 0;
+  int get completeTrays => trays.where((b) => b.isComplete).length;
+  int get totalTrays => trays.length;
+  double get progress => totalTrays > 0 ? completeTrays / totalTrays : 0;
 }

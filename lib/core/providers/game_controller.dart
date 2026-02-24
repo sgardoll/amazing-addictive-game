@@ -1,26 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindsort/core/models/bottle.dart';
+import 'package:mindsort/core/models/tray.dart';
 import 'package:mindsort/core/models/level.dart';
 import 'package:mindsort/core/services/level_generator.dart';
 
 class GameStateData {
   final int levelId;
-  final List<Bottle> bottles;
+  final List<Tray> trays;
   final int moves;
   final int parMoves;
   final bool isWon;
-  final int? selectedBottleIndex;
-  final List<List<Bottle>> history;
+  final int? selectedTrayIndex;
+  final List<List<Tray>> history;
   final int hintsUsed;
   final bool showHint;
 
   const GameStateData({
     required this.levelId,
-    required this.bottles,
+    required this.trays,
     required this.moves,
     required this.parMoves,
     required this.isWon,
-    this.selectedBottleIndex,
+    this.selectedTrayIndex,
     this.history = const [],
     this.hintsUsed = 0,
     this.showHint = false,
@@ -28,25 +28,25 @@ class GameStateData {
 
   GameStateData copyWith({
     int? levelId,
-    List<Bottle>? bottles,
+    List<Tray>? trays,
     int? moves,
     int? parMoves,
     bool? isWon,
-    int? selectedBottleIndex,
+    int? selectedTrayIndex,
     bool clearSelection = false,
-    List<List<Bottle>>? history,
+    List<List<Tray>>? history,
     int? hintsUsed,
     bool? showHint,
   }) {
     return GameStateData(
       levelId: levelId ?? this.levelId,
-      bottles: bottles ?? this.bottles,
+      trays: trays ?? this.trays,
       moves: moves ?? this.moves,
       parMoves: parMoves ?? this.parMoves,
       isWon: isWon ?? this.isWon,
-      selectedBottleIndex: clearSelection
+      selectedTrayIndex: clearSelection
           ? null
-          : (selectedBottleIndex ?? this.selectedBottleIndex),
+          : (selectedTrayIndex ?? this.selectedTrayIndex),
       history: history ?? this.history,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       showHint: showHint ?? this.showHint,
@@ -54,9 +54,8 @@ class GameStateData {
   }
 
   bool get canUndo => history.isNotEmpty;
-  int get completeBottles =>
-      bottles.where((b) => b.isComplete || b.isEmpty).length;
-  int get totalBottles => bottles.length;
+  int get completeTrays => trays.where((b) => b.isComplete || b.isEmpty).length;
+  int get totalTrays => trays.length;
 }
 
 class GameControllerState {
@@ -79,7 +78,7 @@ class GameControllerState {
   factory GameControllerState.initial() => const GameControllerState(
     gameState: GameStateData(
       levelId: 1,
-      bottles: [],
+      trays: [],
       moves: 0,
       parMoves: 10,
       isWon: false,
@@ -119,60 +118,60 @@ class GameController extends StateNotifier<GameControllerState> {
       currentLevel: currentLevel,
       gameState: state.gameState.copyWith(
         levelId: currentLevel.id,
-        bottles: currentLevel.bottles,
+        trays: currentLevel.trays,
         parMoves: currentLevel.parMoves,
       ),
       isLoading: false,
     );
   }
 
-  void selectBottle(int bottleIndex) {
-    final currentSelection = state.gameState.selectedBottleIndex;
-    final bottles = state.gameState.bottles;
+  void selectTray(int trayIndex) {
+    final currentSelection = state.gameState.selectedTrayIndex;
+    final trays = state.gameState.trays;
 
-    if (currentSelection == bottleIndex) {
+    if (currentSelection == trayIndex) {
       state = state.copyWith(
         gameState: state.gameState.copyWith(clearSelection: true),
       );
       return;
     }
 
-    final selectedBottle = bottles[bottleIndex];
+    final selectedTray = trays[trayIndex];
 
     if (currentSelection == null) {
       state = state.copyWith(
-        gameState: state.gameState.copyWith(selectedBottleIndex: bottleIndex),
+        gameState: state.gameState.copyWith(selectedTrayIndex: trayIndex),
       );
       return;
     }
 
-    final fromBottle = bottles[currentSelection];
-    final toBottle = selectedBottle;
+    final fromTray = trays[currentSelection];
+    final toTray = selectedTray;
 
-    if (fromBottle.canPourTo(toBottle)) {
-      final pourableAmount = fromBottle.pourableAmount(toBottle);
-      if (pourableAmount > 0) {
-        final newFrom = _pour(fromBottle, -pourableAmount);
-        final newTo = _pour(toBottle, pourableAmount);
+    if (fromTray.canMoveTo(toTray)) {
+      final movableAmount = fromTray.movableAmount(toTray);
+      if (movableAmount > 0) {
+        final newFrom = _move(fromTray, -movableAmount);
+        final newTo = _move(toTray, movableAmount);
 
-        final newBottles = bottles.asMap().entries.map((entry) {
+        final newTrays = trays.asMap().entries.map((entry) {
           if (entry.key == currentSelection) return newFrom;
-          if (entry.key == bottleIndex) return newTo;
+          if (entry.key == trayIndex) return newTo;
           return entry.value;
         }).toList();
 
-        final newHistory = [...state.gameState.history, bottles];
+        final newHistory = [...state.gameState.history, trays];
 
         state = state.copyWith(
           gameState: state.gameState.copyWith(
-            bottles: newBottles,
+            trays: newTrays,
             clearSelection: true,
             moves: state.gameState.moves + 1,
             history: newHistory,
           ),
         );
 
-        if (_checkWin(newBottles)) {
+        if (_checkWin(newTrays)) {
           _handleWin();
         }
       }
@@ -189,7 +188,7 @@ class GameController extends StateNotifier<GameControllerState> {
 
       state = state.copyWith(
         gameState: state.gameState.copyWith(
-          bottles: lastState,
+          trays: lastState,
           clearSelection: true,
           moves: state.gameState.moves - 1,
           history: newHistory,
@@ -203,7 +202,7 @@ class GameController extends StateNotifier<GameControllerState> {
       state = state.copyWith(
         gameState: GameStateData(
           levelId: state.currentLevel!.id,
-          bottles: state.currentLevel!.bottles,
+          trays: state.currentLevel!.trays,
           moves: 0,
           parMoves: state.currentLevel!.parMoves,
           isWon: false,
@@ -227,7 +226,7 @@ class GameController extends StateNotifier<GameControllerState> {
       state = state.copyWith(
         gameState: GameStateData(
           levelId: nextLevel.id,
-          bottles: nextLevel.bottles,
+          trays: nextLevel.trays,
           moves: 0,
           parMoves: nextLevel.parMoves,
           isWon: false,
@@ -239,19 +238,19 @@ class GameController extends StateNotifier<GameControllerState> {
   }
 
   void useHint() {
-    final bottles = state.gameState.bottles;
+    final trays = state.gameState.trays;
     final hintsUsed = state.gameState.hintsUsed;
-    for (int from = 0; from < bottles.length; from++) {
-      if (bottles[from].isEmpty) {
+    for (int from = 0; from < trays.length; from++) {
+      if (trays[from].isEmpty) {
         continue;
       }
-      for (int to = 0; to < bottles.length; to++) {
+      for (int to = 0; to < trays.length; to++) {
         if (from == to) {
           continue;
         }
-        if (bottles[from].canPourTo(bottles[to])) {
-          selectBottle(from);
-          selectBottle(to);
+        if (trays[from].canMoveTo(trays[to])) {
+          selectTray(from);
+          selectTray(to);
           state = state.copyWith(
             gameState: state.gameState.copyWith(hintsUsed: hintsUsed + 1),
           );
@@ -261,37 +260,37 @@ class GameController extends StateNotifier<GameControllerState> {
     }
   }
 
-  void onBottleTap(int bottleIndex) {
-    selectBottle(bottleIndex);
+  void onTrayTap(int trayIndex) {
+    selectTray(trayIndex);
   }
 
-  void addBottle() {
-    final bottles = state.gameState.bottles;
-    final newBottle = Bottle(id: bottles.length + 1, capacity: 4);
+  void addTray() {
+    final trays = state.gameState.trays;
+    final newTray = Tray(id: trays.length + 1, capacity: 4);
     state = state.copyWith(
-      gameState: state.gameState.copyWith(bottles: [...bottles, newBottle]),
+      gameState: state.gameState.copyWith(trays: [...trays, newTray]),
     );
   }
 
-  Bottle _pour(Bottle bottle, int amount) {
-    if (amount == 0) return bottle;
+  Tray _move(Tray tray, int amount) {
+    if (amount == 0) return tray;
 
-    final newContents = bottle.contents.toList();
+    final newContents = tray.contents.toList();
     if (amount > 0) {
-      final topColor = bottle.top;
-      if (topColor == null) return bottle;
+      final topIngredient = tray.top;
+      if (topIngredient == null) return tray;
       for (int i = 0; i < amount; i++) {
-        newContents.add(topColor);
+        newContents.add(topIngredient);
       }
     } else {
       newContents.removeRange(newContents.length + amount, newContents.length);
     }
 
-    return bottle.copyWith(contents: newContents);
+    return tray.copyWith(contents: newContents);
   }
 
-  bool _checkWin(List<Bottle> bottles) {
-    return bottles.every((bottle) => bottle.isComplete || bottle.isEmpty);
+  bool _checkWin(List<Tray> trays) {
+    return trays.every((tray) => tray.isComplete || tray.isEmpty);
   }
 
   void _handleWin() {
