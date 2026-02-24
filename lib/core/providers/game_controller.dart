@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mindsort/core/models/customer.dart';
+import 'package:mindsort/core/models/ingredient.dart';
 import 'package:mindsort/core/models/tray.dart';
 import 'package:mindsort/core/models/level.dart';
 import 'package:mindsort/core/services/level_generator.dart';
@@ -13,6 +18,8 @@ class GameStateData {
   final List<List<Tray>> history;
   final int hintsUsed;
   final bool showHint;
+  final List<Customer> activeCustomers;
+  final bool isGameOver;
 
   const GameStateData({
     required this.levelId,
@@ -24,6 +31,8 @@ class GameStateData {
     this.history = const [],
     this.hintsUsed = 0,
     this.showHint = false,
+    this.activeCustomers = const [],
+    this.isGameOver = false,
   });
 
   GameStateData copyWith({
@@ -37,6 +46,8 @@ class GameStateData {
     List<List<Tray>>? history,
     int? hintsUsed,
     bool? showHint,
+    List<Customer>? activeCustomers,
+    bool? isGameOver,
   }) {
     return GameStateData(
       levelId: levelId ?? this.levelId,
@@ -50,6 +61,8 @@ class GameStateData {
       history: history ?? this.history,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       showHint: showHint ?? this.showHint,
+      activeCustomers: activeCustomers ?? this.activeCustomers,
+      isGameOver: isGameOver ?? this.isGameOver,
     );
   }
 
@@ -105,9 +118,20 @@ class GameControllerState {
 }
 
 class GameController extends StateNotifier<GameControllerState> {
+  Timer? _gameTicker;
+  final Random _random = Random();
+  int _ticksSinceLastCustomer = 0;
+
   GameController() : super(GameControllerState.initial());
 
+  @override
+  void dispose() {
+    _gameTicker?.cancel();
+    super.dispose();
+  }
+
   void initializeGame() {
+    _gameTicker?.cancel();
     state = GameControllerState(isLoading: true, gameState: state.gameState);
 
     final levels = LevelGenerator.generateLevels(count: 120);
@@ -120,8 +144,74 @@ class GameController extends StateNotifier<GameControllerState> {
         levelId: currentLevel.id,
         trays: currentLevel.trays,
         parMoves: currentLevel.parMoves,
+        activeCustomers: [],
+        isGameOver: false,
       ),
       isLoading: false,
+    );
+
+    _startGameTicker();
+  }
+
+  void _startGameTicker() {
+    _ticksSinceLastCustomer = 0;
+    _gameTicker = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.isWon || state.gameState.isGameOver) {
+        timer.cancel();
+        return;
+      }
+
+      _tickGame();
+    });
+  }
+
+  void _tickGame() {
+    bool gameOver = false;
+    final List<Customer> updatedCustomers = [];
+
+    for (final customer in state.gameState.activeCustomers) {
+      final newPatience = customer.currentPatience - 1;
+      if (newPatience <= 0) {
+        gameOver = true;
+      }
+      updatedCustomers.add(customer.copyWith(currentPatience: newPatience));
+    }
+
+    if (gameOver) {
+      _gameTicker?.cancel();
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(
+          activeCustomers: updatedCustomers,
+          isGameOver: true,
+        ),
+      );
+      return;
+    }
+
+    _ticksSinceLastCustomer++;
+
+    // Spawn a new customer randomly every few seconds (e.g., 5-10 seconds) if less than 3 active
+    if (updatedCustomers.length < 3) {
+      if (_ticksSinceLastCustomer >= 5) {
+        // 20% chance each second after 5 seconds
+        if (_random.nextDouble() < 0.2 || _ticksSinceLastCustomer > 10) {
+          final ingredientValues = Ingredient.values;
+          final randomIngredient =
+              ingredientValues[_random.nextInt(ingredientValues.length)];
+          final newCustomer = Customer(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            order: randomIngredient,
+            maxPatience: 30, // 30 seconds patience
+            currentPatience: 30,
+          );
+          updatedCustomers.add(newCustomer);
+          _ticksSinceLastCustomer = 0;
+        }
+      }
+    }
+
+    state = state.copyWith(
+      gameState: state.gameState.copyWith(activeCustomers: updatedCustomers),
     );
   }
 
@@ -151,8 +241,9 @@ class GameController extends StateNotifier<GameControllerState> {
     if (fromTray.canMoveTo(toTray)) {
       final movableAmount = fromTray.movableAmount(toTray);
       if (movableAmount > 0) {
+        final ingredientToMove = fromTray.top;
         final newFrom = _move(fromTray, -movableAmount);
-        final newTo = _move(toTray, movableAmount);
+        final newTo = _move(toTray, movableAmount, ingredientToMove);
 
         final newTrays = trays.asMap().entries.map((entry) {
           if (entry.key == currentSelection) return newFrom;
@@ -199,6 +290,7 @@ class GameController extends StateNotifier<GameControllerState> {
 
   void restartLevel() {
     if (state.currentLevel != null) {
+      _gameTicker?.cancel();
       state = state.copyWith(
         gameState: GameStateData(
           levelId: state.currentLevel!.id,
@@ -206,9 +298,12 @@ class GameController extends StateNotifier<GameControllerState> {
           moves: 0,
           parMoves: state.currentLevel!.parMoves,
           isWon: false,
+          activeCustomers: [],
+          isGameOver: false,
         ),
         isWon: false,
       );
+      _startGameTicker();
     }
   }
 
@@ -223,6 +318,7 @@ class GameController extends StateNotifier<GameControllerState> {
     }
 
     if (nextLevel != null) {
+      _gameTicker?.cancel();
       state = state.copyWith(
         gameState: GameStateData(
           levelId: nextLevel.id,
@@ -230,10 +326,13 @@ class GameController extends StateNotifier<GameControllerState> {
           moves: 0,
           parMoves: nextLevel.parMoves,
           isWon: false,
+          activeCustomers: [],
+          isGameOver: false,
         ),
         currentLevel: nextLevel,
         isWon: false,
       );
+      _startGameTicker();
     }
   }
 
@@ -272,12 +371,12 @@ class GameController extends StateNotifier<GameControllerState> {
     );
   }
 
-  Tray _move(Tray tray, int amount) {
+  Tray _move(Tray tray, int amount, [Ingredient? ingredient]) {
     if (amount == 0) return tray;
 
     final newContents = tray.contents.toList();
     if (amount > 0) {
-      final topIngredient = tray.top;
+      final topIngredient = ingredient ?? tray.top;
       if (topIngredient == null) return tray;
       for (int i = 0; i < amount; i++) {
         newContents.add(topIngredient);
@@ -294,6 +393,7 @@ class GameController extends StateNotifier<GameControllerState> {
   }
 
   void _handleWin() {
+    _gameTicker?.cancel();
     state = state.copyWith(
       isWon: true,
       gameState: state.gameState.copyWith(isWon: true),
