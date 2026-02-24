@@ -38,6 +38,11 @@ class _IngredientTrayState extends State<IngredientTray>
       begin: 0.2,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    // Start animation immediately if already selected
+    if (widget.isSelected) {
+      _controller.repeat(reverse: true);
+    }
   }
 
   @override
@@ -46,8 +51,7 @@ class _IngredientTrayState extends State<IngredientTray>
     if (widget.isSelected && !oldWidget.isSelected) {
       _controller.repeat(reverse: true);
     } else if (!widget.isSelected && oldWidget.isSelected) {
-      _controller.stop();
-      _controller.value = 0;
+      _controller.reset();
     }
   }
 

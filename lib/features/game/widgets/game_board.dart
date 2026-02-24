@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:mindsort/core/providers/iap_controller.dart';
 import 'package:mindsort/core/providers/settings_controller.dart';
 import 'package:mindsort/features/game/widgets/ingredient_tray.dart';
+import 'package:mindsort/features/game/widgets/customer_view.dart';
 
 class GameBoard extends ConsumerWidget {
   const GameBoard({super.key});
@@ -14,54 +15,82 @@ class GameBoard extends ConsumerWidget {
     final state = ref.watch(gameControllerProvider);
     final settings = ref.watch(settingsControllerProvider);
     final trays = state.gameState.trays;
+    final customers = state.gameState.activeCustomers;
 
     if (trays.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFB0BEC5), // Steel-like background
-          border: Border.all(
-            color: const Color(0xFF37474F),
-            width: 6,
-          ), // Rigid, dark border
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black54,
-              blurRadius: 10,
-              offset: Offset(0, 6),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (customers.isNotEmpty)
+          Container(
+            height: 100,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: customers
+                      .map((c) => CustomerView(customer: c))
+                      .toList(),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Wrap(
-          spacing: 8, // Tighter spacing for cluttered feel
-          runSpacing: 12,
-          alignment: WrapAlignment.center,
-          children: List.generate(trays.length, (index) {
-            final tray = trays[index];
-            final isSelected = state.gameState.selectedTrayIndex == index;
+          )
+        else
+          const SizedBox(height: 100),
+        const SizedBox(height: 20),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFB0BEC5), // Steel-like background
+            border: Border.all(
+              color: const Color(0xFF37474F),
+              width: 6,
+            ), // Rigid, dark border
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 10,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Wrap(
+            spacing: 8, // Tighter spacing for cluttered feel
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: List.generate(trays.length, (index) {
+              final tray = trays[index];
+              final isSelected = state.gameState.selectedTrayIndex == index;
 
-            return IngredientTray(
-              tray: tray,
-              isSelected: isSelected,
-              onTap: () {
-                if (settings.hapticsEnabled) {
-                  HapticFeedback.selectionClick();
-                }
-                if (settings.soundEnabled) {
-                  SystemSound.play(SystemSoundType.click);
-                }
-                ref.read(gameControllerProvider.notifier).onTrayTap(index);
-              },
-            );
-          }),
+              return IngredientTray(
+                tray: tray,
+                isSelected: isSelected,
+                onTap: () {
+                  if (settings.hapticsEnabled) {
+                    HapticFeedback.selectionClick();
+                  }
+                  if (settings.soundEnabled) {
+                    SystemSound.play(SystemSoundType.click);
+                  }
+
+                  if (tray.isComplete) {
+                    ref.read(gameControllerProvider.notifier).serveTray(index);
+                  } else {
+                    ref.read(gameControllerProvider.notifier).onTrayTap(index);
+                  }
+                },
+              );
+            }),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -90,9 +119,9 @@ class GameHUD extends ConsumerWidget {
             value: '${gameState.moves}',
           ),
           _buildStatChip(
-            icon: Icons.star,
-            label: 'Target',
-            value: '${gameState.parMoves}',
+            icon: Icons.people,
+            label: 'Served',
+            value: '${gameState.customersServed}/${gameState.targetCustomers}',
           ),
         ],
       ),

@@ -6,10 +6,21 @@ Emotion-sorting puzzle game built with Flutter.
 
 ```bash
 flutter pub get
+# iOS needs the GAD_APP_ID defined, Android uses it automatically via build.gradle.kts or falls back to test IDs
+export ADMOB_ANDROID_APP_ID="ca-app-pub-3940256099942544~3347511713"
+export GAD_APP_ID="ca-app-pub-3940256099942544~1458002511"
+
 flutter run --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY
 ```
 
 ## Build
+
+Before building for release, inject your production AdMob IDs:
+
+```bash
+export ADMOB_ANDROID_APP_ID="ca-app-pub-xxx~yyy"
+export GAD_APP_ID="ca-app-pub-xxx~zzz"
+```
 
 ```bash
 flutter build apk --release --dart-define=REVENUECAT_API_KEY=YOUR_REVENUECAT_KEY

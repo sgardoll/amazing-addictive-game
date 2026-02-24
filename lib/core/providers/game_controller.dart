@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mindsort/core/models/customer.dart';
+import 'package:mindsort/core/models/ingredient.dart';
 import 'package:mindsort/core/models/tray.dart';
 import 'package:mindsort/core/models/level.dart';
 import 'package:mindsort/core/services/level_generator.dart';
+import 'package:mindsort/core/services/ad_service.dart';
 
 class GameStateData {
   final int levelId;
@@ -13,6 +19,10 @@ class GameStateData {
   final List<List<Tray>> history;
   final int hintsUsed;
   final bool showHint;
+  final List<Customer> activeCustomers;
+  final bool isGameOver;
+  final int customersServed;
+  final int targetCustomers;
 
   const GameStateData({
     required this.levelId,
@@ -24,6 +34,10 @@ class GameStateData {
     this.history = const [],
     this.hintsUsed = 0,
     this.showHint = false,
+    this.activeCustomers = const [],
+    this.isGameOver = false,
+    this.customersServed = 0,
+    this.targetCustomers = 5,
   });
 
   GameStateData copyWith({
@@ -37,6 +51,10 @@ class GameStateData {
     List<List<Tray>>? history,
     int? hintsUsed,
     bool? showHint,
+    List<Customer>? activeCustomers,
+    bool? isGameOver,
+    int? customersServed,
+    int? targetCustomers,
   }) {
     return GameStateData(
       levelId: levelId ?? this.levelId,
@@ -50,6 +68,10 @@ class GameStateData {
       history: history ?? this.history,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       showHint: showHint ?? this.showHint,
+      activeCustomers: activeCustomers ?? this.activeCustomers,
+      isGameOver: isGameOver ?? this.isGameOver,
+      customersServed: customersServed ?? this.customersServed,
+      targetCustomers: targetCustomers ?? this.targetCustomers,
     );
   }
 
@@ -105,9 +127,25 @@ class GameControllerState {
 }
 
 class GameController extends StateNotifier<GameControllerState> {
-  GameController() : super(GameControllerState.initial());
+  final AdService _adService;
+  Timer? _gameTicker;
+  final Random _random = Random();
+  int _ticksSinceLastCustomer = 0;
+  bool _adShown = false;
+
+  GameController(this._adService) : super(GameControllerState.initial());
+
+  @override
+  void dispose() {
+    if (_gameTicker != null) {
+      _gameTicker!.cancel();
+      _gameTicker = null;
+    }
+    super.dispose();
+  }
 
   void initializeGame() {
+    _gameTicker?.cancel();
     state = GameControllerState(isLoading: true, gameState: state.gameState);
 
     final levels = LevelGenerator.generateLevels(count: 120);
@@ -120,8 +158,87 @@ class GameController extends StateNotifier<GameControllerState> {
         levelId: currentLevel.id,
         trays: currentLevel.trays,
         parMoves: currentLevel.parMoves,
+        activeCustomers: [],
+        isGameOver: false,
+        customersServed: 0,
+        targetCustomers: 5,
       ),
       isLoading: false,
+    );
+
+    _adShown = false;
+    _adService.loadInterstitialAd();
+    _startGameTicker();
+  }
+
+  void _startGameTicker() {
+    _ticksSinceLastCustomer = 0;
+    _gameTicker = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.isWon || state.gameState.isGameOver) {
+        timer.cancel();
+        return;
+      }
+
+      _tickGame();
+    });
+  }
+
+  void _tickGame() {
+    bool gameOver = false;
+    final List<Customer> updatedCustomers = [];
+
+    for (final customer in state.gameState.activeCustomers) {
+      final clampedPatience = max(0, customer.currentPatience - 1);
+      if (clampedPatience <= 0) {
+        gameOver = true;
+      }
+      updatedCustomers.add(customer.copyWith(currentPatience: clampedPatience));
+    }
+
+    if (gameOver) {
+      if (!state.gameState.isGameOver) {
+        if (!_adShown) {
+          _adShown = true;
+          _adService.showInterstitialAd();
+        }
+      }
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(
+          activeCustomers: updatedCustomers,
+          isGameOver: true,
+        ),
+      );
+      return;
+    }
+
+    _ticksSinceLastCustomer++;
+
+    // Spawn a new customer randomly every few seconds (e.g., 5-10 seconds) if less than 3 active
+    if (updatedCustomers.length < 3) {
+      if (_ticksSinceLastCustomer >= 5) {
+        // 20% chance each second after 5 seconds
+        if (_random.nextDouble() < 0.2 || _ticksSinceLastCustomer > 10) {
+          final ingredientValues = Ingredient.values;
+          final randomIngredient =
+              ingredientValues[_random.nextInt(ingredientValues.length)];
+          final newCustomer = Customer(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            order: randomIngredient,
+            maxPatience: 30, // 30 seconds patience
+            currentPatience: 30,
+          );
+          updatedCustomers.add(newCustomer);
+          _ticksSinceLastCustomer = 0;
+        }
+      }
+    }
+
+    state = state.copyWith(
+      gameState: state.gameState.copyWith(activeCustomers: updatedCustomers),
     );
   }
 
@@ -151,8 +268,9 @@ class GameController extends StateNotifier<GameControllerState> {
     if (fromTray.canMoveTo(toTray)) {
       final movableAmount = fromTray.movableAmount(toTray);
       if (movableAmount > 0) {
+        final ingredientToMove = fromTray.top;
         final newFrom = _move(fromTray, -movableAmount);
-        final newTo = _move(toTray, movableAmount);
+        final newTo = _move(toTray, movableAmount, ingredientToMove);
 
         final newTrays = trays.asMap().entries.map((entry) {
           if (entry.key == currentSelection) return newFrom;
@@ -170,10 +288,47 @@ class GameController extends StateNotifier<GameControllerState> {
             history: newHistory,
           ),
         );
+      }
+    }
+  }
 
-        if (_checkWin(newTrays)) {
-          _handleWin();
-        }
+  void serveTray(int trayIndex) {
+    if (state.isWon || state.gameState.isGameOver) return;
+
+    final trays = state.gameState.trays;
+    if (trayIndex < 0 || trayIndex >= trays.length) return;
+
+    final tray = trays[trayIndex];
+    if (!tray.isComplete || tray.isEmpty) return;
+
+    final ingredient = tray.top!;
+    final customers = state.gameState.activeCustomers.toList();
+
+    // Selection relies on collection order. Since customers are appended to
+    // the list on arrival, the first matching customer (lowest index)
+    // represents the oldest matching customer waiting.
+    final customerIndex = customers.indexWhere((c) => c.order == ingredient);
+    if (customerIndex != -1) {
+      customers.removeAt(customerIndex);
+
+      final newTrays = List<Tray>.from(trays);
+      newTrays[trayIndex] = tray.copyWith(contents: []);
+
+      final newServed = state.gameState.customersServed + 1;
+
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(
+          activeCustomers: customers,
+          trays: newTrays,
+          customersServed: newServed,
+          history:
+              [], // Clear history to prevent undoing a serve and duplicating score
+          clearSelection: state.gameState.selectedTrayIndex == trayIndex,
+        ),
+      );
+
+      if (_checkWin()) {
+        _handleWin();
       }
     }
   }
@@ -199,6 +354,11 @@ class GameController extends StateNotifier<GameControllerState> {
 
   void restartLevel() {
     if (state.currentLevel != null) {
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
+      _adShown = false;
       state = state.copyWith(
         gameState: GameStateData(
           levelId: state.currentLevel!.id,
@@ -206,9 +366,15 @@ class GameController extends StateNotifier<GameControllerState> {
           moves: 0,
           parMoves: state.currentLevel!.parMoves,
           isWon: false,
+          activeCustomers: [],
+          isGameOver: false,
+          customersServed: 0,
+          targetCustomers: state.gameState.targetCustomers,
         ),
         isWon: false,
       );
+      _adService.loadInterstitialAd();
+      _startGameTicker();
     }
   }
 
@@ -223,6 +389,11 @@ class GameController extends StateNotifier<GameControllerState> {
     }
 
     if (nextLevel != null) {
+      if (_gameTicker != null) {
+        _gameTicker!.cancel();
+        _gameTicker = null;
+      }
+      _adShown = false;
       state = state.copyWith(
         gameState: GameStateData(
           levelId: nextLevel.id,
@@ -230,10 +401,16 @@ class GameController extends StateNotifier<GameControllerState> {
           moves: 0,
           parMoves: nextLevel.parMoves,
           isWon: false,
+          activeCustomers: [],
+          isGameOver: false,
+          customersServed: 0,
+          targetCustomers: state.gameState.targetCustomers,
         ),
         currentLevel: nextLevel,
         isWon: false,
       );
+      _adService.loadInterstitialAd();
+      _startGameTicker();
     }
   }
 
@@ -272,12 +449,12 @@ class GameController extends StateNotifier<GameControllerState> {
     );
   }
 
-  Tray _move(Tray tray, int amount) {
+  Tray _move(Tray tray, int amount, [Ingredient? ingredient]) {
     if (amount == 0) return tray;
 
     final newContents = tray.contents.toList();
     if (amount > 0) {
-      final topIngredient = tray.top;
+      final topIngredient = ingredient ?? tray.top;
       if (topIngredient == null) return tray;
       for (int i = 0; i < amount; i++) {
         newContents.add(topIngredient);
@@ -289,11 +466,15 @@ class GameController extends StateNotifier<GameControllerState> {
     return tray.copyWith(contents: newContents);
   }
 
-  bool _checkWin(List<Tray> trays) {
-    return trays.every((tray) => tray.isComplete || tray.isEmpty);
+  bool _checkWin() {
+    return state.gameState.customersServed >= state.gameState.targetCustomers;
   }
 
   void _handleWin() {
+    if (_gameTicker != null) {
+      _gameTicker!.cancel();
+      _gameTicker = null;
+    }
     state = state.copyWith(
       isWon: true,
       gameState: state.gameState.copyWith(isWon: true),
@@ -303,5 +484,6 @@ class GameController extends StateNotifier<GameControllerState> {
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameControllerState>((ref) {
-      return GameController();
+      final adService = ref.read(adServiceProvider);
+      return GameController(adService);
     });

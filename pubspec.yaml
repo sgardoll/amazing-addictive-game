@@ -23,6 +23,7 @@ dependencies:
   
   # IAP
   purchases_flutter: ^8.4.0
+  google_mobile_ads: ^7.0.0
   
   # UI/Animations
   flutter_animate: ^4.5.2

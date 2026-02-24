@@ -2,11 +2,11 @@
 
 ## Milestones
 
-- 🚧 **v2.0 Hyper-Casual Pivot** - Phases 1-4 (in progress)
+- ✅ **v2.0 Hyper-Casual Pivot** - Phases 1-4 (complete)
 
 ## Phases
 
-### 🚧 v2.0 Hyper-Casual Pivot (In Progress)
+### ✅ v2.0 Hyper-Casual Pivot (Complete)
 
 **Milestone Goal:** Abandon the mindful sorting premise and rebuild the game into a chaotic, ad-driven hyper-casual experience.
 
@@ -26,20 +26,20 @@ Plans:
 **Goal**: Convert sequential Riverpod state to a real-time reactive loop with a Customer model, decay timer, and GameController ticker.
 **Depends on**: Phase 1
 **Research**: Unlikely (Internal Riverpod timer architecture)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: TBD
+- [x] 02-01: Inject the Chaos Engine
 
 #### Phase 3: Rewrite the Resolution Logic
 
 **Goal**: Change win condition to an active order-fulfillment model (drag-to-submit/tap-to-serve) that validates completed bottles against active Customer orders.
 **Depends on**: Phase 2
 **Research**: Unlikely (Internal game logic)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01: Rewrite Resolution Logic
 
 #### Phase 4: Weaponise the Monetization Strategy
 
@@ -47,16 +47,16 @@ Plans:
 **Depends on**: Phase 3
 **Research**: Likely (Ad integration patterns)
 **Research topics**: google_mobile_ads setup for Flutter, handling interstitial ad loading states, complying with App Store ad guidelines for hyper-casual games.
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 04-01: TBD
+- [x] 04-01: AdMob Interstitial Integration
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Kill the Thematic Dissonance | v2.0 | 2/2 | Complete | 2026-02-24 |
-| 2. Inject the Chaos Engine | v2.0 | 0/? | Not started | - |
-| 3. Rewrite the Resolution Logic | v2.0 | 0/? | Not started | - |
-| 4. Weaponise the Monetization Strategy | v2.0 | 0/? | Not started | - |
+| 2. Inject the Chaos Engine | v2.0 | 1/1 | Complete | 2026-02-24 |
+| 3. Rewrite the Resolution Logic | v2.0 | 1/1 | Complete | 2026-02-24 |
+| 4. Weaponise the Monetization Strategy | v2.0 | 1/1 | Complete | 2026-02-24 |

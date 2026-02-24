@@ -15,7 +15,12 @@ class LevelGenerator {
     final capacity = difficulty['capacity'] as int;
     final parMoves = difficulty['par'] as int;
 
-    final ingredients = Ingredient.values.take(ingredientCount).toList();
+    if (Ingredient.values.length < ingredientCount) {
+      throw ArgumentError(
+        'Enum Ingredient has fewer values than ingredientCount: $ingredientCount',
+      );
+    }
+    final ingredients = Ingredient.values.sublist(0, ingredientCount);
     final trays = _createSolvedPuzzle(ingredients, emptyTrays, capacity);
     final shuffled = _shuffleTrays(trays, levelId);
 

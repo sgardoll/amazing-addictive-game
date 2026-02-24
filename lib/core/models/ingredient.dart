@@ -8,8 +8,8 @@ enum Ingredient {
   hotdog(Color(0xFFE64A19), 'Hotdog', '🌭'),
   donut(Color(0xFFFFB300), 'Donut', '🍩');
 
-  const Ingredient(this.color, this.name, this.emoji);
+  const Ingredient(this.color, this.displayName, this.emoji);
   final Color color;
-  final String name;
+  final String displayName;
   final String emoji;
 }

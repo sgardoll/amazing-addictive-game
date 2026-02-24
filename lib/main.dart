@@ -9,7 +9,11 @@ import 'package:mindsort/core/services/revenuecat_service.dart';
 import 'package:mindsort/features/game/widgets/game_board.dart';
 import 'package:confetti/confetti.dart';
 
-void main() {
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MindSortApp()));
 }
 
