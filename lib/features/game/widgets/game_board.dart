@@ -95,11 +95,7 @@ class GameBoard extends ConsumerWidget {
       SystemSound.play(SystemSoundType.click);
     }
 
-    if (tray.isComplete) {
-      ref.read(gameControllerProvider.notifier).serveTray(index);
-    } else {
-      ref.read(gameControllerProvider.notifier).onTrayTap(index);
-    }
+    ref.read(gameControllerProvider.notifier).onTrayTap(index);
   }
 }
 

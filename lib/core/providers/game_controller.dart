@@ -288,7 +288,19 @@ class GameController extends StateNotifier<GameControllerState> {
             history: newHistory,
           ),
         );
+        return;
       }
+    }
+
+    // If move is invalid, switch selection to the tapped tray (if it has items) or clear selection
+    if (!toTray.isEmpty) {
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(selectedTrayIndex: trayIndex),
+      );
+    } else {
+      state = state.copyWith(
+        gameState: state.gameState.copyWith(clearSelection: true),
+      );
     }
   }
 
@@ -438,6 +450,24 @@ class GameController extends StateNotifier<GameControllerState> {
   }
 
   void onTrayTap(int trayIndex) {
+    if (state.isWon || state.gameState.isGameOver) return;
+
+    final trays = state.gameState.trays;
+    if (trayIndex < 0 || trayIndex >= trays.length) return;
+
+    final tray = trays[trayIndex];
+
+    if (tray.isComplete && !tray.isEmpty) {
+      final ingredient = tray.top!;
+      final customers = state.gameState.activeCustomers;
+      final customerIndex = customers.indexWhere((c) => c.order == ingredient);
+
+      if (customerIndex != -1) {
+        serveTray(trayIndex);
+        return;
+      }
+    }
+
     selectTray(trayIndex);
   }
 
