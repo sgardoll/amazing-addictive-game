@@ -39,12 +39,30 @@ class AchievementController extends StateNotifier<AchievementState> {
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
+
+    Set<String> unlockedSet =
+        (prefs.getStringList(_unlockedKey) ?? const <String>[]).toSet();
+
+    // Migration from old IDs to new ones
+    bool needsMigration = false;
+    final migratedSet = unlockedSet.map((id) {
+      if (id == 'emotion_master') {
+        needsMigration = true;
+        return 'fast_food_master';
+      }
+      return id;
+    }).toSet();
+
     state = AchievementState(
       levelsCompleted: prefs.getInt(_levelsKey) ?? 0,
       purchasesMade: prefs.getInt(_purchasesKey) ?? 0,
       maxStreak: prefs.getInt(_streakKey) ?? 0,
-      unlocked: (prefs.getStringList(_unlockedKey) ?? const <String>[]).toSet(),
+      unlocked: migratedSet,
     );
+
+    if (needsMigration) {
+      await _save(state.copyWith(unlocked: migratedSet));
+    }
   }
 
   Future<void> recordLevelComplete() async {
