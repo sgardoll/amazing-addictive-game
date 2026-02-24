@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindsort/core/providers/achievement_controller.dart';
-import 'package:mindsort/core/providers/daily_challenge_controller.dart';
-import 'package:mindsort/core/providers/game_controller.dart';
-import 'package:mindsort/core/providers/iap_controller.dart';
-import 'package:mindsort/core/providers/settings_controller.dart';
-import 'package:mindsort/core/services/revenuecat_service.dart';
-import 'package:mindsort/features/game/widgets/game_board.dart';
+import 'package:order_panic/core/providers/achievement_controller.dart';
+import 'package:order_panic/core/providers/daily_challenge_controller.dart';
+import 'package:order_panic/core/providers/game_controller.dart';
+import 'package:order_panic/core/providers/iap_controller.dart';
+import 'package:order_panic/core/providers/settings_controller.dart';
+import 'package:order_panic/core/services/revenuecat_service.dart';
+import 'package:order_panic/features/game/widgets/game_board.dart';
 import 'package:confetti/confetti.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';

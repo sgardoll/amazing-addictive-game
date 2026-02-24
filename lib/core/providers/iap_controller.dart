@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindsort/core/services/revenuecat_service.dart';
+import 'package:order_panic/core/services/revenuecat_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class IapState {

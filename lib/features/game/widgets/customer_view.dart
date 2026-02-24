@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mindsort/core/models/customer.dart';
+import 'package:order_panic/core/models/customer.dart';
 
 class CustomerView extends StatelessWidget {
   final Customer customer;

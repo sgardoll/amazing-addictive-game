@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindsort/core/models/customer.dart';
-import 'package:mindsort/core/models/ingredient.dart';
-import 'package:mindsort/core/models/tray.dart';
-import 'package:mindsort/core/models/level.dart';
-import 'package:mindsort/core/services/level_generator.dart';
-import 'package:mindsort/core/services/ad_service.dart';
+import 'package:order_panic/core/models/customer.dart';
+import 'package:order_panic/core/models/ingredient.dart';
+import 'package:order_panic/core/models/tray.dart';
+import 'package:order_panic/core/models/level.dart';
+import 'package:order_panic/core/services/level_generator.dart';
+import 'package:order_panic/core/services/ad_service.dart';
 
 class GameStateData {
   final int levelId;
