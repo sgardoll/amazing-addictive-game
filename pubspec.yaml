@@ -1,8 +1,8 @@
-name: mindsweeper
-description: "A mindful emotion sorting puzzle game"
+name: order_panic
+description: "A colourful and challenging puzzle game"
 publish_to: 'none'
 
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.10.0
