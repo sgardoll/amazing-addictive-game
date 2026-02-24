@@ -373,6 +373,7 @@ class GameController extends StateNotifier<GameControllerState> {
         ),
         isWon: false,
       );
+      _adService.loadInterstitialAd();
       _startGameTicker();
     }
   }
@@ -408,6 +409,7 @@ class GameController extends StateNotifier<GameControllerState> {
         currentLevel: nextLevel,
         isWon: false,
       );
+      _adService.loadInterstitialAd();
       _startGameTicker();
     }
   }
