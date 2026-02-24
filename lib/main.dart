@@ -80,6 +80,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         final status =
             await AppTrackingTransparency.trackingAuthorizationStatus;
         if (status == TrackingStatus.notDetermined) {
+          await Future.delayed(const Duration(milliseconds: 200));
           final newStatus =
               await AppTrackingTransparency.requestTrackingAuthorization();
           if (newStatus != TrackingStatus.authorized) {
