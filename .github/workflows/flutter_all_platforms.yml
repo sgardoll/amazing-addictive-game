@@ -41,7 +41,8 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-        run: flutter build appbundle --release
+          ADMOB_ANDROID_APP_ID: ${{ secrets.ADMOB_ANDROID_APP_ID }}
+        run: flutter build appbundle --release --dart-define=REVENUECAT_GOOGLE_API_KEY=${{ secrets.REVENUECAT_GOOGLE_API_KEY }} --dart-define=ANDROID_INTERSTITIAL_AD_UNIT_ID=${{ secrets.ANDROID_INTERSTITIAL_AD_UNIT_ID }}
       - uses: actions/upload-artifact@v4
         with:
           name: android-aab
@@ -57,7 +58,10 @@ jobs:
       - run: flutter pub get
 
       # iOS (unsigned release app bundle for artifacting)
-      - run: flutter build ios --release --no-codesign
+      - name: Build iOS App
+        env:
+          GAD_APP_ID: ${{ secrets.ADMOB_IOS_APP_ID }}
+        run: flutter build ios --release --no-codesign --dart-define=REVENUECAT_APPLE_API_KEY=${{ secrets.REVENUECAT_APPLE_API_KEY }} --dart-define=IOS_INTERSTITIAL_AD_UNIT_ID=${{ secrets.IOS_INTERSTITIAL_AD_UNIT_ID }}
       - run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app ios-runner-app.zip
 
       # macOS
