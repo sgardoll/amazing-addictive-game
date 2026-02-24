@@ -51,8 +51,7 @@ class _IngredientTrayState extends State<IngredientTray>
     if (widget.isSelected && !oldWidget.isSelected) {
       _controller.repeat(reverse: true);
     } else if (!widget.isSelected && oldWidget.isSelected) {
-      _controller.stop();
-      _controller.value = 0;
+      _controller.reset();
     }
   }
 

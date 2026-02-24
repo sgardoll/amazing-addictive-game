@@ -7,7 +7,6 @@ class GameStateData {
   final int parMoves;
   final bool isWon;
   final Tray? selectedTray;
-  final int? selectedTrayIndex;
   final List<List<Tray>> history;
   final int hintsUsed;
   final bool showHint;
@@ -19,11 +18,16 @@ class GameStateData {
     required this.parMoves,
     required this.isWon,
     this.selectedTray,
-    this.selectedTrayIndex,
     this.history = const [],
     this.hintsUsed = 0,
     this.showHint = false,
   });
+
+  int? get selectedTrayIndex {
+    if (selectedTray == null) return null;
+    final index = trays.indexWhere((t) => t.id == selectedTray!.id);
+    return index != -1 ? index : null;
+  }
 
   GameStateData copyWith({
     int? levelId,
@@ -32,7 +36,6 @@ class GameStateData {
     int? parMoves,
     bool? isWon,
     Tray? selectedTray,
-    int? selectedTrayIndex,
     bool? clearSelection,
     List<List<Tray>>? history,
     int? hintsUsed,
@@ -47,9 +50,6 @@ class GameStateData {
       selectedTray: clearSelection == true
           ? null
           : (selectedTray ?? this.selectedTray),
-      selectedTrayIndex: clearSelection == true
-          ? null
-          : (selectedTrayIndex ?? this.selectedTrayIndex),
       history: history ?? this.history,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       showHint: showHint ?? this.showHint,
