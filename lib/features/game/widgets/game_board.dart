@@ -4,7 +4,7 @@ import 'package:mindsort/core/providers/game_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:mindsort/core/providers/iap_controller.dart';
 import 'package:mindsort/core/providers/settings_controller.dart';
-import 'package:mindsort/features/game/widgets/emotion_bottle.dart';
+import 'package:mindsort/features/game/widgets/ingredient_tray.dart';
 
 class GameBoard extends ConsumerWidget {
   const GameBoard({super.key});
@@ -13,9 +13,9 @@ class GameBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(gameControllerProvider);
     final settings = ref.watch(settingsControllerProvider);
-    final bottles = state.gameState.bottles;
+    final trays = state.gameState.trays;
 
-    if (bottles.isEmpty) {
+    if (trays.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -26,12 +26,12 @@ class GameBoard extends ConsumerWidget {
           spacing: 16,
           runSpacing: 24,
           alignment: WrapAlignment.center,
-          children: List.generate(bottles.length, (index) {
-            final bottle = bottles[index];
-            final isSelected = state.gameState.selectedBottleIndex == index;
+          children: List.generate(trays.length, (index) {
+            final tray = trays[index];
+            final isSelected = state.gameState.selectedTrayIndex == index;
 
-            return EmotionBottle(
-              bottle: bottle,
+            return IngredientTray(
+              tray: tray,
               isSelected: isSelected,
               onTap: () {
                 if (settings.hapticsEnabled) {
@@ -40,7 +40,7 @@ class GameBoard extends ConsumerWidget {
                 if (settings.soundEnabled) {
                   SystemSound.play(SystemSoundType.click);
                 }
-                ref.read(gameControllerProvider.notifier).onBottleTap(index);
+                ref.read(gameControllerProvider.notifier).onTrayTap(index);
               },
             );
           }),
@@ -164,12 +164,12 @@ class GameControls extends ConsumerWidget {
           ),
           _buildControlButton(
             icon: Icons.add_circle_outline,
-            label: 'Add Bottle',
+            label: 'Add Tray',
             onPressed: () {
               _runFeedback(settings);
               if (iapState.hasWeeklyPass ||
                   ref.read(iapControllerProvider.notifier).spendGems(50)) {
-                ref.read(gameControllerProvider.notifier).addBottle();
+                ref.read(gameControllerProvider.notifier).addTray();
               }
             },
           ),

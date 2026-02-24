@@ -1,31 +1,31 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:mindsort/core/models/bottle.dart';
-import 'package:mindsort/core/models/emotion.dart';
+import 'package:mindsort/core/models/tray.dart';
+import 'package:mindsort/core/models/ingredient.dart';
 
-class EmotionBottle extends StatefulWidget {
-  const EmotionBottle({
+class IngredientTray extends StatefulWidget {
+  const IngredientTray({
     super.key,
-    required this.bottle,
+    required this.tray,
     required this.isSelected,
     required this.onTap,
     this.isHinted = false,
   });
 
-  final Bottle bottle;
+  final Tray tray;
   final bool isSelected;
   final VoidCallback onTap;
   final bool isHinted;
 
   @override
-  State<EmotionBottle> createState() => _EmotionBottleState();
+  State<IngredientTray> createState() => _IngredientTrayState();
 }
 
-class _EmotionBottleState extends State<EmotionBottle>
+class _IngredientTrayState extends State<IngredientTray>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _selectionAnimation;
-  late Animation<double> _pourAnimation;
+  late Animation<double> _moveAnimation;
 
   @override
   void initState() {
@@ -38,14 +38,14 @@ class _EmotionBottleState extends State<EmotionBottle>
       begin: 0,
       end: -20,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _pourAnimation = Tween<double>(
+    _moveAnimation = Tween<double>(
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
-  void didUpdateWidget(EmotionBottle oldWidget) {
+  void didUpdateWidget(IngredientTray oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
@@ -99,8 +99,8 @@ class _EmotionBottleState extends State<EmotionBottle>
             borderRadius: BorderRadius.circular(10),
             child: CustomPaint(
               painter: _LiquidPainter(
-                contents: widget.bottle.contents,
-                capacity: widget.bottle.capacity,
+                contents: widget.tray.contents,
+                capacity: widget.tray.capacity,
               ),
               size: const Size(60, 200),
             ),
@@ -114,7 +114,7 @@ class _EmotionBottleState extends State<EmotionBottle>
 class _LiquidPainter extends CustomPainter {
   _LiquidPainter({required this.contents, required this.capacity});
 
-  final List<Emotion> contents;
+  final List<Ingredient> contents;
   final int capacity;
 
   @override
@@ -126,17 +126,19 @@ class _LiquidPainter extends CustomPainter {
     final cornerRadius = 10.0;
 
     int colorGroupStart = 0;
-    Emotion currentColor = contents[0];
+    Ingredient currentIngredient = contents[0];
 
     for (int i = 0; i < contents.length; i++) {
-      final emotion = contents[i];
-      if (emotion != currentColor || i == contents.length - 1) {
-        final endIndex = (emotion != currentColor) ? i : contents.length;
+      final ingredient = contents[i];
+      if (ingredient != currentIngredient || i == contents.length - 1) {
+        final endIndex = (ingredient != currentIngredient)
+            ? i
+            : contents.length;
         final startY = (capacity - endIndex) * layerHeight;
         final height = (endIndex - colorGroupStart) * layerHeight;
 
         final paint = Paint()
-          ..color = currentColor.color.withOpacity(0.9)
+          ..color = currentIngredient.color.withOpacity(0.9)
           ..style = PaintingStyle.fill;
 
         final rect = RRect.fromRectAndRadius(
@@ -145,7 +147,7 @@ class _LiquidPainter extends CustomPainter {
         );
         canvas.drawRRect(rect, paint);
 
-        currentColor = emotion;
+        currentIngredient = ingredient;
         colorGroupStart = i;
       }
     }
@@ -181,8 +183,8 @@ class _LiquidPainter extends CustomPainter {
   }
 }
 
-class BottleCompleteEffect extends StatefulWidget {
-  const BottleCompleteEffect({
+class TrayCompleteEffect extends StatefulWidget {
+  const TrayCompleteEffect({
     super.key,
     required this.child,
     required this.isComplete,
@@ -192,10 +194,10 @@ class BottleCompleteEffect extends StatefulWidget {
   final bool isComplete;
 
   @override
-  State<BottleCompleteEffect> createState() => _BottleCompleteEffectState();
+  State<TrayCompleteEffect> createState() => _TrayCompleteEffectState();
 }
 
-class _BottleCompleteEffectState extends State<BottleCompleteEffect>
+class _TrayCompleteEffectState extends State<TrayCompleteEffect>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
