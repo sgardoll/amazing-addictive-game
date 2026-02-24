@@ -469,7 +469,10 @@ class GameController extends StateNotifier<GameControllerState> {
   }
 
   void _handleWin() {
-    _gameTicker?.cancel();
+    if (_gameTicker != null) {
+      _gameTicker!.cancel();
+      _gameTicker = null;
+    }
     state = state.copyWith(
       isWon: true,
       gameState: state.gameState.copyWith(isWon: true),
@@ -479,6 +482,6 @@ class GameController extends StateNotifier<GameControllerState> {
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameControllerState>((ref) {
-      final adService = ref.watch(adServiceProvider);
+      final adService = ref.read(adServiceProvider);
       return GameController(adService);
     });
