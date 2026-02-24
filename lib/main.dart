@@ -24,7 +24,7 @@ class MindSortApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6366F1),
+          seedColor: const Color(0xFFE53935),
           brightness: settings.darkMode ? Brightness.dark : Brightness.light,
         ),
         useMaterial3: true,
@@ -104,9 +104,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF1E1B4B),
-                  Color(0xFF312E81),
-                  Color(0xFF4C1D95),
+                  Color(0xFFD32F2F),
+                  Color(0xFFE65100),
+                  Color(0xFFFF8F00),
                 ],
               ),
             ),
@@ -204,7 +204,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   void _openSettings(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1F1B4B),
+      backgroundColor: const Color(0xFF37474F),
       builder: (context) {
         return Consumer(
           builder: (context, ref, _) {
@@ -261,7 +261,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   void _openDailyRewards(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1F1B4B),
+      backgroundColor: const Color(0xFF37474F),
       builder: (context) {
         return Consumer(
           builder: (context, ref, _) {
@@ -321,7 +321,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(26),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -344,7 +344,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   void _openShop(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1F1B4B),
+      backgroundColor: const Color(0xFF37474F),
       builder: (context) {
         return Consumer(
           builder: (context, ref, _) {
@@ -498,7 +498,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.celebration, size: 64, color: Color(0xFF6366F1)),
+              const Icon(Icons.celebration, size: 64, color: Color(0xFFE53935)),
               const SizedBox(height: 16),
               const Text(
                 'Harmony Restored!',
@@ -530,7 +530,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       ref.read(gameControllerProvider.notifier).nextLevel();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
+                      backgroundColor: const Color(0xFFE53935),
                       foregroundColor: Colors.white,
                     ),
                     child: const Text('Next Level'),
