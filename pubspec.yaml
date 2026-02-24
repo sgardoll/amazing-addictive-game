@@ -24,6 +24,7 @@ dependencies:
   # IAP
   purchases_flutter: ^8.4.0
   google_mobile_ads: ^7.0.0
+  flutter_native_splash: ^2.4.0
   
   # UI/Animations
   flutter_animate: ^4.5.2
@@ -47,13 +48,12 @@ dev_dependencies:
   riverpod_generator: ^2.6.2
   freezed: ^2.5.7
   json_serializable: ^6.9.0
-  flutter_native_splash: ^2.4.0
 
 flutter_native_splash:
   color: "#000000"
-  background_image: "assets/splash.jpg"
+  background_image: "assets/splash.png"
   android_12:
-    background_image: "assets/splash.jpg"
+    image: "assets/splash.png"
   fullscreen: true
 
 flutter:

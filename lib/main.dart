@@ -9,10 +9,12 @@ import 'package:mindsort/core/services/revenuecat_service.dart';
 import 'package:mindsort/features/game/widgets/game_board.dart';
 import 'package:confetti/confetti.dart';
 
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MindSortApp()));
 }
@@ -61,6 +63,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ref.read(dailyChallengeProvider.notifier).initialize();
       ref.read(achievementControllerProvider.notifier).initialize();
       ref.read(settingsControllerProvider.notifier).initialize();
+      FlutterNativeSplash.remove();
     });
   }
 
